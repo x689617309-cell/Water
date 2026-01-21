@@ -37,34 +37,28 @@
         .glass-tube { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 0 20px rgba(255,255,255,0.2); }
         body.dark .glass-tube { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); }
 
-        /* --- SHEET --- */
+        /* --- SHEETS --- */
         .sheet {
             transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
             background: rgba(250, 250, 250, 0.9); backdrop-filter: blur(50px) saturate(180%);
             border-top: 1px solid rgba(255,255,255,0.6); box-shadow: 0 -10px 40px rgba(0,0,0,0.1); color: #1d1d1f;
         }
-        body.dark .sheet { background: rgba(25, 25, 25, 0.85); border-top: 1px solid rgba(255,255,255,0.15); color: white; }
+        body.dark .sheet { background: rgba(25, 25, 25, 0.85); border-top: 1px solid rgba(255,255,255,0.15); color: white; box-shadow: 0 -10px 50px rgba(0,0,0,0.5); }
         .sheet.show { transform: translateY(0); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* --- NAPRAWIONY SWITCH --- */
-        /* Kontener */
+        /* --- SWITCH --- */
         .switch-container { position: relative; width: 50px; height: 30px; }
-        /* Checkbox (ukryty) */
         .switch-input { opacity: 0; width: 0; height: 0; }
-        /* Tło (Slider) */
         .switch-slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
             background-color: #ccc; transition: .4s; border-radius: 34px;
         }
         body.dark .switch-slider { background-color: #555; }
-        /* Kółko */
         .switch-slider:before {
             position: absolute; content: ""; height: 26px; width: 26px; left: 2px; bottom: 2px;
-            background-color: white; transition: .4s; border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        /* Stan włączony */
         .switch-input:checked + .switch-slider { background-color: #34C759; }
         .switch-input:checked + .switch-slider:before { transform: translateX(20px); }
 
@@ -92,7 +86,7 @@
         <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"></svg>
     </button>
 
-    <button onclick="toggleHistory()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-current absolute left-6 top-32 z-20 shadow-lg">
+    <button onclick="toggleStats()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-current absolute left-6 top-32 z-20 shadow-lg">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
         </svg>
@@ -147,15 +141,31 @@
         </div>
     </div>
 
-    <div id="overlay" onclick="closeHistory()" class="fixed inset-0 bg-black/20 hidden backdrop-blur-[2px] z-40 transition-opacity duration-300"></div>
+    <div id="overlay" onclick="closeAll()" class="fixed inset-0 bg-black/20 hidden backdrop-blur-[2px] z-40 transition-opacity duration-300"></div>
 
-    <div id="history-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[85vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
+    <div id="history-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[70vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
         <div class="w-10 h-1 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
         
         <div class="flex justify-between items-center mb-4 px-2">
-            <h2 class="font-bold text-2xl">Statystyki</h2>
+            <h2 class="font-bold text-2xl">Dzisiaj</h2>
             <span class="text-sub text-sm font-medium" id="history-date">Data</span>
         </div>
+
+        <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-2"></div>
+
+        <div class="pt-2 border-t border-black/5 dark:border-white/10 flex-shrink-0 space-y-3 mt-2">
+            <button onclick="resetAll()" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                Zresetuj dzień
+            </button>
+            <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeAll()">Zamknij</button>
+        </div>
+    </div>
+
+    <div id="stats-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[80vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
+        <div class="w-10 h-1 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
+        
+        <h2 class="font-bold text-2xl mb-6 px-2">Statystyki & Opcje</h2>
 
         <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-5 mb-4 border border-white/40 dark:border-white/10 shadow-sm flex-shrink-0">
             <div class="flex justify-between items-center mb-4">
@@ -163,12 +173,12 @@
                 <div class="text-xs font-bold text-accent">Średnia: <span id="weekly-avg">0</span> ml</div>
             </div>
             
-            <div class="flex justify-between items-end h-28 gap-2" id="weekly-chart"></div>
+            <div class="flex justify-between items-end h-32 gap-2" id="weekly-chart"></div>
             
             <div class="mt-3 text-[10px] text-center text-sub">Najlepszy dzień: <span id="best-day-val" class="text-accent font-bold">0</span> ml</div>
         </div>
 
-        <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-4 mb-2 border border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center flex-shrink-0">
+        <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-4 mb-auto border border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center flex-shrink-0">
             <div class="flex items-center gap-3">
                 <span class="text-xl">🔔</span>
                 <span class="font-bold">Powiadomienia</span>
@@ -179,15 +189,8 @@
             </label>
         </div>
 
-        <h3 class="font-bold text-lg mb-2 px-2 mt-2">Dziś wypito:</h3>
-        <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-2"></div>
-
-        <div class="pt-2 border-t border-black/5 dark:border-white/10 flex-shrink-0 space-y-3 mt-2">
-            <button onclick="resetAll()" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                Zresetuj dzień
-            </button>
-            <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeHistory()">Zamknij</button>
+        <div class="pt-2 flex-shrink-0">
+             <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeAll()">Zamknij</button>
         </div>
     </div>
 
@@ -198,7 +201,7 @@
         let weeklyRecord = JSON.parse(localStorage.getItem('weeklyRecord')) || {};
         let notificationsEnabled = localStorage.getItem('notifications') === 'true';
 
-        // --- IKONY & MOTYW ---
+        // --- THEME ---
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const isDark = document.body.classList.contains('dark');
@@ -209,7 +212,26 @@
         }
         if(localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); toggleTheme(); } else { toggleTheme(); document.body.classList.remove('dark'); }
 
-        // --- CHART LOGIC ---
+        // --- SHEETS LOGIC ---
+        function toggleHistory() { 
+            closeAll(); renderHistory(); 
+            document.getElementById('history-sheet').classList.add('show'); 
+            document.getElementById('overlay').classList.remove('hidden'); 
+        }
+        
+        function toggleStats() { 
+            closeAll(); saveDailyProgress(); renderChart(); 
+            document.getElementById('stats-sheet').classList.add('show'); 
+            document.getElementById('overlay').classList.remove('hidden'); 
+        }
+
+        function closeAll() {
+            document.getElementById('history-sheet').classList.remove('show');
+            document.getElementById('stats-sheet').classList.remove('show');
+            document.getElementById('overlay').classList.add('hidden');
+        }
+
+        // --- CHART ---
         function getTodayKey() { return new Date().toISOString().split('T')[0]; }
         function saveDailyProgress() { weeklyRecord[getTodayKey()] = total; localStorage.setItem('weeklyRecord', JSON.stringify(weeklyRecord)); }
 
@@ -226,7 +248,7 @@
                 if(val > 0) { sum += val; count++; }
                 if(val > max) max = val;
 
-                let h = Math.round((val / (goal * 1.2)) * 100); // Skala do 120% celu
+                let h = Math.round((val / (goal * 1.2)) * 100); 
                 if(h > 100) h = 100;
 
                 chartContainer.innerHTML += `
@@ -242,14 +264,14 @@
             document.getElementById('best-day-val').innerText = Math.round(max);
         }
 
-        // --- NOTIFICATIONS & FUNCTIONS ---
+        // --- NOTIFICATIONS ---
         document.getElementById('notif-toggle').checked = notificationsEnabled;
         function toggleNotifications() {
             const cb = document.getElementById('notif-toggle');
             if (cb.checked) {
                 Notification.requestPermission().then(p => {
                     if (p === 'granted') { notificationsEnabled = true; localStorage.setItem('notifications', 'true'); new Notification("Włączone! 💧"); } 
-                    else { cb.checked = false; alert("Brak zgody na powiadomienia."); }
+                    else { cb.checked = false; alert("Brak zgody."); }
                 });
             } else { notificationsEnabled = false; localStorage.setItem('notifications', 'false'); }
         }
@@ -266,6 +288,7 @@
         }
         setInterval(checkNotifications, 60000);
 
+        // --- FUNCTIONS ---
         function updateIconDisplay() {
             const s = document.getElementById('beverage');
             const txt = s.options[s.selectedIndex].text;
@@ -273,9 +296,6 @@
         }
 
         document.getElementById('history-date').innerText = new Date().toLocaleDateString('pl-PL', {weekday: 'long', day: 'numeric', month: 'long'});
-
-        function toggleHistory() { saveDailyProgress(); renderChart(); renderHistory(); document.getElementById('history-sheet').classList.toggle('show'); document.getElementById('overlay').classList.remove('hidden'); }
-        function closeHistory() { document.getElementById('history-sheet').classList.remove('show'); document.getElementById('overlay').classList.add('hidden'); }
 
         function checkCustomAmount(s) {
             if (s.value === 'custom') {
@@ -311,7 +331,7 @@
             historyLog.unshift({ id: Date.now(), amount: amt, icon: icon, hydration: hydro, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
             saveData(); update();
         }
-        function resetAll() { if(confirm("Reset dnia?")) { total = 0; historyLog = []; saveData(); update(); closeHistory(); } }
+        function resetAll() { if(confirm("Reset dnia?")) { total = 0; historyLog = []; saveData(); update(); closeAll(); } }
         function deleteEntry(id) { 
             const idx = historyLog.findIndex(i => i.id === id);
             if(idx > -1) { total -= historyLog[idx].hydration; if(total<0)total=0; historyLog.splice(idx,1); saveData(); update(); renderHistory(); }
@@ -321,7 +341,7 @@
             if(!historyLog.length) { l.innerHTML = "<div class='text-center text-sub mt-4 opacity-60'>Pusto...</div>"; return; }
             historyLog.forEach(i => {
                 l.innerHTML += `<div class="flex justify-between items-center bg-white/40 dark:bg-white/5 p-3 rounded-2xl border border-white/40 dark:border-white/10 mb-2">
-                    <div class="flex items-center gap-3"><span class="text-2xl">${i.icon}</span><div><div class="font-bold">${i.amount} ml</div><div class="text-xs text-sub">${i.time}</div></div></div>
+                    <div class="flex items-center gap-3"><span class="text-2xl">${i.icon}</span><div><div class="font-bold text-current">${i.amount} ml</div><div class="text-xs text-sub">${i.time}</div></div></div>
                     <div class="flex items-center gap-3"><span class="text-sm font-bold text-accent">+${Math.round(i.hydration)}</span><button onclick="deleteEntry(${i.id})" class="text-sub hover:text-red-500">✕</button></div>
                 </div>`;
             });
