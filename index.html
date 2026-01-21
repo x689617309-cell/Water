@@ -8,67 +8,69 @@
     <link rel="apple-touch-icon" href="IMG_3634.png">
     <title>HydroTrack Liquid</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
-        /* --- STYLE PODSTAWOWE --- */
+        /* --- ANIMACJE I PRZEJŚCIA --- */
+        body {
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        
+        /* --- TŁO LIGHT (Dzień) --- */
         body {
             background-color: #f0f4ff;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            background-size: 200% 200%;
-            animation: gradient 15s ease infinite;
             color: #1d1d1f;
-            transition: background-color 0.5s, color 0.5s;
         }
-
-        /* --- DARK MODE --- */
+        
+        /* --- TŁO DARK (Noc) --- */
         body.dark {
-            background-color: #000000;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(260, 50%, 10%, 1) 0, transparent 50%), 
-                radial-gradient(at 100% 100%, hsla(220, 60%, 15%, 1) 0, transparent 50%);
-            color: #f5f5f7;
+            background-color: #050505; /* Prawie czarny */
+            color: #ffffff;
         }
 
-        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        /* Bloby w tle (Dzień) */
+        .blob { filter: blur(60px); mix-blend-mode: multiply; opacity: 0.4; transition: all 0.5s; }
+        
+        /* Bloby w tle (Noc - Neonowe) */
+        body.dark .blob { 
+            mix-blend-mode: normal; 
+            opacity: 0.25; 
+            filter: blur(80px);
+        }
 
-        /* --- LIQUID GLASS (JASNY) --- */
+        /* --- LIQUID GLASS (Dzień) --- */
         .liquid-glass {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* --- LIQUID GLASS (Noc - Dark Frost) --- */
+        body.dark .liquid-glass {
+            background: rgba(40, 40, 40, 0.3); /* Ciemne szkło */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Delikatny jasny obrys */
+            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(40px) saturate(200%);
             -webkit-backdrop-filter: blur(40px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
         }
-        
-        /* --- LIQUID GLASS (CIEMNY) --- */
-        body.dark .liquid-glass {
-            background: rgba(30, 30, 30, 0.4); /* Ciemniejsze szkło */
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-            color: white;
-        }
-        
-        /* Kolor akcentu w ciemnym trybie */
-        body.dark .text-\[\#007AFF\] { color: #409CFF; } 
-        body.dark .text-slate-500 { color: #94a3b8; }
-        body.dark .text-slate-600 { color: #cbd5e1; }
-        body.dark .text-slate-700 { color: #e2e8f0; }
-        body.dark .text-slate-800 { color: #f1f5f9; }
 
-        .liquid-glass:active { transform: scale(0.96); transition: all 0.2s; }
+        .liquid-glass:active { transform: scale(0.95); }
 
-        /* Select setup */
+        /* --- SELECTS --- */
         select { 
             -webkit-appearance: none; appearance: none; background-color: transparent; 
             text-align: center; text-align-last: center;
             font-weight: bold; width: 100%; height: 100%;
         }
-        option { color: black; } /* Opcje zawsze czarne dla czytelności systemu */
+        option { color: black; } /* Opcje systemowe zawsze czarne dla czytelności */
 
-        /* Pasek Postępu */
+        /* --- PASEK (TUBE) --- */
         .glass-tube {
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -76,46 +78,68 @@
         }
         body.dark .glass-tube {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
         }
 
-        /* Sheet */
+        /* --- SHEET (Menu Dolne) --- */
         .sheet {
             transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-            background: rgba(250, 250, 250, 0.85); backdrop-filter: blur(50px) saturate(180%);
-            border-top: 1px solid rgba(255,255,255,0.5); box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            background: rgba(250, 250, 250, 0.9); 
+            backdrop-filter: blur(50px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.6); 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            color: #1d1d1f;
         }
+        /* Sheet w trybie ciemnym */
         body.dark .sheet {
-            background: rgba(30, 30, 30, 0.9);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(25, 25, 25, 0.85); /* Bardzo ciemny szary */
+            border-top: 1px solid rgba(255,255,255,0.15);
             color: white;
+            box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
         }
         .sheet.show { transform: translateY(0); }
         .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Elementy listy w historii - Dark Mode */
+        body.dark .history-item {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        body.dark .history-item-icon {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        /* Akcenty kolorystyczne */
+        .text-accent { color: #007AFF; }
+        body.dark .text-accent { color: #409CFF; } /* Jaśniejszy niebieski na ciemnym tle */
+        
+        .text-sub { color: #64748b; }
+        body.dark .text-sub { color: #94a3b8; }
     </style>
 </head>
 <body class="flex flex-col items-center h-screen font-sans overflow-hidden relative selection:bg-blue-200">
 
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-inherit transition-colors duration-500">
+        <div class="blob absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400 rounded-full animate-blob"></div>
+        <div class="blob absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-400 rounded-full animate-blob animation-delay-2000"></div>
+        <div class="blob absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-indigo-400 rounded-full animate-blob animation-delay-4000"></div>
     </div>
 
-    <div id="clock" class="absolute top-6 left-1/2 -translate-x-1/2 text-slate-600 font-medium text-xs tracking-wide mix-blend-overlay opacity-60">00:00</div>
+    <div id="clock" class="absolute top-6 left-1/2 -translate-x-1/2 font-medium text-xs tracking-wide opacity-50 mix-blend-difference text-white">00:00</div>
 
-    <button onclick="toggleTheme()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-slate-700 absolute left-6 top-16 z-20 shadow-lg">
+    <button onclick="toggleTheme()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-current absolute left-6 top-16 z-20 shadow-lg transition-colors">
         <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
         </svg>
     </button>
 
-    <button onclick="toggleHistory()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-slate-700 absolute right-6 top-16 z-20 shadow-lg">
+    <button onclick="toggleHistory()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-current absolute right-6 top-16 z-20 shadow-lg">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
     </button>
 
-    <button onclick="setGoal()" class="liquid-glass px-6 py-3 rounded-full font-semibold text-slate-700 text-sm mt-32 mb-4 z-10 flex items-center gap-2">
-        <span>CEL:</span> <span id="display-goal" class="font-bold">2500</span> <span>ml</span>
+    <button onclick="setGoal()" class="liquid-glass px-6 py-3 rounded-full font-semibold text-sm mt-32 mb-4 z-10 flex items-center gap-2 text-current">
+        <span class="opacity-70">CEL:</span> <span id="display-goal" class="font-bold">2500</span> <span>ml</span>
     </button>
 
     <div class="flex-grow flex flex-col justify-center items-center w-full relative z-0 gap-6">
@@ -124,16 +148,16 @@
             <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent pointer-events-none"></div>
         </div>
         <div class="text-center z-10">
-            <div class="text-6xl font-thin text-slate-800 tracking-tighter drop-shadow-sm"><span id="total">0</span></div>
-            <div class="text-slate-500 uppercase tracking-[0.2em] text-[10px] font-semibold mt-1">ml nawodnienia</div>
-            <div class="mt-2 text-3xl font-bold text-[#007AFF] drop-shadow-sm"><span id="percent-display">0</span>%</div>
+            <div class="text-6xl font-thin tracking-tighter drop-shadow-sm text-current"><span id="total">0</span></div>
+            <div class="text-sub uppercase tracking-[0.2em] text-[10px] font-semibold mt-1">ml nawodnienia</div>
+            <div class="mt-2 text-3xl font-bold text-accent drop-shadow-sm"><span id="percent-display">0</span>%</div>
         </div>
     </div>
 
     <div class="flex items-center justify-between w-full max-w-[320px] mb-12 px-2 z-20 gap-5">
         
         <div class="relative w-[76px] h-[76px]">
-            <select id="amount-select" onchange="checkCustomAmount(this)" class="liquid-glass w-full h-full rounded-full text-[#007AFF] text-xl outline-none cursor-pointer font-bold">
+            <select id="amount-select" onchange="checkCustomAmount(this)" class="liquid-glass w-full h-full rounded-full text-accent text-xl outline-none cursor-pointer font-bold">
                 <option value="100">100</option>
                 <option value="250" selected>250</option>
                 <option value="330">330</option>
@@ -141,10 +165,10 @@
                 <option value="1000">1000</option>
                 <option value="custom">✎</option>
             </select>
-            <span class="absolute bottom-3 left-0 right-0 text-center text-[9px] text-slate-500 font-bold uppercase tracking-wide pointer-events-none">ML</span>
+            <span class="absolute bottom-3 left-0 right-0 text-center text-[9px] text-sub font-bold uppercase tracking-wide pointer-events-none">ML</span>
         </div>
 
-        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-[#007AFF] shadow-2xl hover:scale-105 transition duration-300">
+        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-accent shadow-2xl hover:scale-105 transition duration-300">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -152,11 +176,11 @@
 
         <div class="relative w-[76px] h-[76px] liquid-glass rounded-full flex items-center justify-center">
             <span id="beverage-icon-display" class="text-3xl pointer-events-none">💧</span>
-            
             <select id="beverage" onchange="updateIconDisplay(); checkAutoAdd();" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                 <optgroup label="Napoje">
                     <option value="1.0">💧 Woda</option>
-                    <option value="0.9">🧃 Sok</option> <option value="0.85">☕ Kawa</option>
+                    <option value="0.9">🧃 Sok</option>
+                    <option value="0.85">☕ Kawa</option>
                     <option value="1.0">☕🥛 Kawa z mlek.</option>
                     <option value="1.15">🥥 Woda Koko</option>
                     <option value="1.15">🥛 Mleko</option>
@@ -180,18 +204,21 @@
     <div id="overlay" onclick="closeHistory()" class="fixed inset-0 bg-black/20 hidden backdrop-blur-[2px] z-40 transition-opacity duration-300"></div>
 
     <div id="history-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[75vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
-        <div class="w-10 h-1 bg-black/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
+        <div class="w-10 h-1 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
+        
         <div class="flex justify-between items-center mb-6 px-2">
-            <h2 class="font-bold text-2xl text-slate-800 dark:text-white">Dzisiaj</h2>
-            <span class="text-slate-400 text-sm font-medium" id="history-date">Data</span>
+            <h2 class="font-bold text-2xl">Dzisiaj</h2>
+            <span class="text-sub text-sm font-medium" id="history-date">Data</span>
         </div>
+
         <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-6"></div>
+
         <div class="pt-4 mt-2 border-t border-black/5 dark:border-white/10 flex-shrink-0 space-y-3">
             <button onclick="resetAll()" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                 Zresetuj dzień
             </button>
-            <button class="w-full bg-white dark:bg-slate-700 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeHistory()">Zamknij</button>
+            <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeHistory()">Zamknij</button>
         </div>
     </div>
 
@@ -200,7 +227,7 @@
         let goal = parseInt(localStorage.getItem('goal')) || 2500;
         let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
         
-        // IKONY
+        // --- IKONY ---
         const iconMap = {
             '1.0': '💧', '0.9': '🧃', '0.85': '☕', '1.0_milk': '☕🥛', '1.15_coco': '🥥', '1.15_milk': '🥛', 
             '0.9_energy': '⚡', '0.9_coke': '🥤', '0.98': '🍵', '0.6': '🍸',
@@ -208,40 +235,47 @@
             'fruit-apple': '🍎', 'fruit-watermelon': '🍉', 'fruit-pineapple': '🍍'
         };
 
-        // Dark Mode Logic
+        // --- DARK MODE LOGIC ---
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const isDark = document.body.classList.contains('dark');
-            // Zmiana ikony
-            const icon = document.getElementById('theme-icon');
-            if(isDark) {
-                // Słońce
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />';
-            } else {
-                // Księżyc
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />';
-            }
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
         }
 
-        // Init theme
-        if(localStorage.getItem('theme') === 'dark') toggleTheme();
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById('theme-icon');
+            if(isDark) {
+                // Ikona słońca (żeby wrócić do jasnego)
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />';
+            } else {
+                // Ikona księżyca
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />';
+            }
+        }
 
-        // Display update for right button (Tylko Emotka)
+        if(localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            updateThemeIcon(true);
+        } else {
+            updateThemeIcon(false);
+        }
+
+        // --- UPDATE ICON RIGHT BUTTON ---
         function updateIconDisplay() {
             const select = document.getElementById('beverage');
             const selectedText = select.options[select.selectedIndex].text;
-            // Wyciągamy pierwszy znak (emotkę)
             const emoji = Array.from(selectedText)[0]; 
-            // Jeśli to "Woda Koko" albo coś złożonego, musimy uważać, ale tu emotki są na początku
-            document.getElementById('beverage-icon-display').innerText = emoji + (selectedText.startsWith('☕🥛') ? '🥛' : ''); // Fix dla podwójnej emotki
+            document.getElementById('beverage-icon-display').innerText = emoji + (selectedText.startsWith('☕🥛') ? '🥛' : '');
         }
 
         document.getElementById('history-date').innerText = new Date().toLocaleDateString('pl-PL', {weekday: 'long', day: 'numeric', month: 'long'});
 
+        // --- EKRANY ---
         function toggleHistory() { renderHistory(); document.getElementById('history-sheet').classList.toggle('show'); document.getElementById('overlay').classList.remove('hidden'); }
         function closeHistory() { document.getElementById('history-sheet').classList.remove('show'); document.getElementById('overlay').classList.add('hidden'); }
 
+        // --- CUSTOM AMOUNT ---
         function checkCustomAmount(select) {
             if (select.value === 'custom') {
                 let n = prompt("Podaj ilość ml (max 10000):");
@@ -282,20 +316,18 @@
         function addDrink() {
             const select = document.getElementById('beverage');
             const value = select.value;
-            let factor = 1.0;
             if (value.startsWith('fruit-')) {
                 const option = select.options[select.selectedIndex];
-                factor = parseFloat(option.getAttribute('data-ml'));
+                const factor = parseFloat(option.getAttribute('data-ml'));
                 executeAdd(value, factor, true, select);
             } else {
-                factor = parseFloat(value);
+                const factor = parseFloat(value);
                 executeAdd(value, factor, false, select);
             }
         }
 
         function executeAdd(typeKey, factorOrFixedMl, isFruit, selectElement) {
             let entryAmount, realHydration;
-
             if (isFruit) {
                 entryAmount = factorOrFixedMl;
                 realHydration = entryAmount; 
@@ -307,7 +339,6 @@
             
             total += realHydration;
             
-            // Pobieranie ikony
             const index = selectElement.selectedIndex;
             const text = selectElement.options[index].text;
             const icon = Array.from(text)[0] + (text.startsWith('☕🥛') ? '🥛' : '');
@@ -330,11 +361,23 @@
 
         function renderHistory() {
             const list = document.getElementById('history-list'); list.innerHTML = "";
-            if(historyLog.length === 0) { list.innerHTML = "<div class='text-center text-slate-400 mt-10 opacity-60'>Pusto... Wypij coś! 💧</div>"; return; }
+            if(historyLog.length === 0) { list.innerHTML = "<div class='text-center text-sub mt-10 opacity-60'>Pusto... Wypij coś! 💧</div>"; return; }
             historyLog.forEach(item => {
                 const el = document.createElement('div');
-                el.className = "flex justify-between items-center bg-white/40 dark:bg-white/10 backdrop-blur-md p-4 rounded-[20px] border border-white/40 dark:border-white/10 shadow-sm";
-                el.innerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 bg-white/60 dark:bg-white/20 rounded-full flex items-center justify-center text-2xl shadow-sm">${item.icon}</div><div><div class="font-bold text-slate-800 dark:text-white text-lg">${item.amount} ml</div><div class="text-xs text-slate-500 dark:text-slate-400 font-medium">${item.time}</div></div></div><div class="flex items-center gap-4"><span class="text-sm font-bold text-[#007AFF] dark:text-[#409CFF]">+${Math.round(item.hydration)}</span><button onclick="deleteEntry(${item.id})" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 transition">✕</button></div>`;
+                // Klasy pomocnicze do stylowania dark mode w CSS
+                el.className = "history-item flex justify-between items-center bg-white/40 backdrop-blur-md p-4 rounded-[20px] border border-white/40 shadow-sm transition-colors";
+                el.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="history-item-icon w-10 h-10 bg-white/60 rounded-full flex items-center justify-center text-2xl shadow-sm">${item.icon}</div>
+                        <div>
+                            <div class="font-bold text-lg">${item.amount} ml</div>
+                            <div class="text-xs text-sub font-medium">${item.time}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-bold text-accent">+${Math.round(item.hydration)}</span>
+                        <button onclick="deleteEntry(${item.id})" class="w-8 h-8 flex items-center justify-center text-sub hover:text-red-500 transition">✕</button>
+                    </div>`;
                 list.appendChild(el);
             });
         }
@@ -352,7 +395,7 @@
 
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
         update();
-        updateIconDisplay(); // Init icon
+        updateIconDisplay();
     </script>
     <style> @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } } .animate-blob { animation: blob 7s infinite; } .animation-delay-2000 { animation-delay: 2s; } .animation-delay-4000 { animation-delay: 4s; } </style>
 </body>
