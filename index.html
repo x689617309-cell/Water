@@ -16,19 +16,21 @@
         .blob { filter: blur(60px); mix-blend-mode: multiply; opacity: 0.4; transition: all 0.5s; }
         body.dark .blob { mix-blend-mode: normal; opacity: 0.25; filter: blur(80px); }
 
-        /* --- LIQUID GLASS --- */
+        /* --- LIQUID GLASS Z EFEKTEM POWIĘKSZENIA --- */
         .liquid-glass {
             background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.4);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Sprężysta animacja */
         }
         body.dark .liquid-glass {
             background: rgba(40, 40, 40, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
-        .liquid-glass:active { transform: scale(0.95); }
+        
+        /* EFEKT POWIĘKSZENIA PRZY KLIKNIĘCIU */
+        .liquid-glass:active { transform: scale(1.1); }
 
         select { -webkit-appearance: none; appearance: none; background: transparent; text-align: center; text-align-last: center; font-weight: bold; width: 100%; height: 100%; }
         option { color: black; }
@@ -82,18 +84,18 @@
 
     <div id="clock" class="absolute top-6 left-1/2 -translate-x-1/2 font-medium text-xs tracking-wide opacity-50 mix-blend-difference text-white">00:00</div>
 
-    <button onclick="toggleTheme()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-current absolute left-6 top-16 z-20 shadow-lg">
-        <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"></svg>
+    <button onclick="toggleTheme()" class="liquid-glass w-14 h-14 rounded-full flex items-center justify-center text-current absolute left-6 top-16 z-20 shadow-lg">
+        <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"></svg>
     </button>
 
-    <button onclick="toggleStats()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-current absolute left-6 top-32 z-20 shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+    <button onclick="toggleStats()" class="liquid-glass w-14 h-14 rounded-full flex items-center justify-center text-current absolute left-6 top-32 z-20 shadow-lg mt-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
         </svg>
     </button>
 
-    <button onclick="toggleHistory()" class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-current absolute right-6 top-16 z-20 shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <button onclick="toggleHistory()" class="liquid-glass w-14 h-14 rounded-full flex items-center justify-center text-current absolute right-6 top-16 z-20 shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
     </button>
 
     <button onclick="setGoal()" class="liquid-glass px-6 py-3 rounded-full font-semibold text-sm mt-20 mb-4 z-10 flex items-center gap-2 text-current">
@@ -120,7 +122,7 @@
             <span class="absolute bottom-3 left-0 right-0 text-center text-[9px] text-sub font-bold uppercase tracking-wide pointer-events-none">ML</span>
         </div>
 
-        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-accent shadow-2xl hover:scale-105 transition duration-300">
+        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-accent shadow-2xl transition duration-300">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
         </button>
 
@@ -145,14 +147,11 @@
 
     <div id="history-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[70vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
         <div class="w-10 h-1 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
-        
         <div class="flex justify-between items-center mb-4 px-2">
             <h2 class="font-bold text-2xl">Dzisiaj</h2>
             <span class="text-sub text-sm font-medium" id="history-date">Data</span>
         </div>
-
         <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-2"></div>
-
         <div class="pt-2 border-t border-black/5 dark:border-white/10 flex-shrink-0 space-y-3 mt-2">
             <button onclick="resetAll()" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
@@ -164,20 +163,15 @@
 
     <div id="stats-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[80vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
         <div class="w-10 h-1 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
-        
         <h2 class="font-bold text-2xl mb-6 px-2">Statystyki & Opcje</h2>
-
         <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-5 mb-4 border border-white/40 dark:border-white/10 shadow-sm flex-shrink-0">
             <div class="flex justify-between items-center mb-4">
                 <div class="text-xs text-sub font-bold uppercase">Ostatnie 7 dni</div>
                 <div class="text-xs font-bold text-accent">Średnia: <span id="weekly-avg">0</span> ml</div>
             </div>
-            
             <div class="flex justify-between items-end h-32 gap-2" id="weekly-chart"></div>
-            
             <div class="mt-3 text-[10px] text-center text-sub">Najlepszy dzień: <span id="best-day-val" class="text-accent font-bold">0</span> ml</div>
         </div>
-
         <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-4 mb-auto border border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center flex-shrink-0">
             <div class="flex items-center gap-3">
                 <span class="text-xl">🔔</span>
@@ -188,7 +182,6 @@
                 <span class="switch-slider"></span>
             </label>
         </div>
-
         <div class="pt-2 flex-shrink-0">
              <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeAll()">Zamknij</button>
         </div>
@@ -201,7 +194,6 @@
         let weeklyRecord = JSON.parse(localStorage.getItem('weeklyRecord')) || {};
         let notificationsEnabled = localStorage.getItem('notifications') === 'true';
 
-        // --- THEME ---
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const isDark = document.body.classList.contains('dark');
@@ -212,26 +204,10 @@
         }
         if(localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); toggleTheme(); } else { toggleTheme(); document.body.classList.remove('dark'); }
 
-        // --- SHEETS LOGIC ---
-        function toggleHistory() { 
-            closeAll(); renderHistory(); 
-            document.getElementById('history-sheet').classList.add('show'); 
-            document.getElementById('overlay').classList.remove('hidden'); 
-        }
-        
-        function toggleStats() { 
-            closeAll(); saveDailyProgress(); renderChart(); 
-            document.getElementById('stats-sheet').classList.add('show'); 
-            document.getElementById('overlay').classList.remove('hidden'); 
-        }
+        function toggleHistory() { closeAll(); renderHistory(); document.getElementById('history-sheet').classList.add('show'); document.getElementById('overlay').classList.remove('hidden'); }
+        function toggleStats() { closeAll(); saveDailyProgress(); renderChart(); document.getElementById('stats-sheet').classList.add('show'); document.getElementById('overlay').classList.remove('hidden'); }
+        function closeAll() { document.getElementById('history-sheet').classList.remove('show'); document.getElementById('stats-sheet').classList.remove('show'); document.getElementById('overlay').classList.add('hidden'); }
 
-        function closeAll() {
-            document.getElementById('history-sheet').classList.remove('show');
-            document.getElementById('stats-sheet').classList.remove('show');
-            document.getElementById('overlay').classList.add('hidden');
-        }
-
-        // --- CHART ---
         function getTodayKey() { return new Date().toISOString().split('T')[0]; }
         function saveDailyProgress() { weeklyRecord[getTodayKey()] = total; localStorage.setItem('weeklyRecord', JSON.stringify(weeklyRecord)); }
 
@@ -239,32 +215,19 @@
             const chartContainer = document.getElementById('weekly-chart'); chartContainer.innerHTML = '';
             const days = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
             let sum = 0, count = 0, max = 0;
-            
             for (let i = 6; i >= 0; i--) {
                 const d = new Date(); d.setDate(d.getDate() - i);
                 const key = d.toISOString().split('T')[0];
                 const val = weeklyRecord[key] || 0;
-                
                 if(val > 0) { sum += val; count++; }
                 if(val > max) max = val;
-
-                let h = Math.round((val / (goal * 1.2)) * 100); 
-                if(h > 100) h = 100;
-
-                chartContainer.innerHTML += `
-                <div class="flex flex-col items-center gap-1 w-full h-full justify-end group">
-                    <span class="text-[8px] opacity-0 group-hover:opacity-100 transition absolute -mt-4 bg-black text-white px-1 rounded">${Math.round(val)}</span>
-                    <div class="chart-bar-bg w-full h-full relative">
-                        <div class="chart-fill" style="height: ${h}%"></div>
-                    </div>
-                    <span class="text-[9px] font-bold opacity-60">${days[d.getDay()]}</span>
-                </div>`;
+                let h = Math.round((val / (goal * 1.2)) * 100); if(h > 100) h = 100;
+                chartContainer.innerHTML += `<div class="flex flex-col items-center gap-1 w-full h-full justify-end group"><span class="text-[8px] opacity-0 group-hover:opacity-100 transition absolute -mt-4 bg-black text-white px-1 rounded">${Math.round(val)}</span><div class="chart-bar-bg w-full h-full relative"><div class="chart-fill" style="height: ${h}%"></div></div><span class="text-[9px] font-bold opacity-60">${days[d.getDay()]}</span></div>`;
             }
             document.getElementById('weekly-avg').innerText = count > 0 ? Math.round(sum / 7) : 0;
             document.getElementById('best-day-val').innerText = Math.round(max);
         }
 
-        // --- NOTIFICATIONS ---
         document.getElementById('notif-toggle').checked = notificationsEnabled;
         function toggleNotifications() {
             const cb = document.getElementById('notif-toggle');
@@ -276,19 +239,6 @@
             } else { notificationsEnabled = false; localStorage.setItem('notifications', 'false'); }
         }
 
-        function checkNotifications() {
-            if (!notificationsEnabled) return;
-            const now = new Date(); const tKey = getTodayKey();
-            if (now.getHours() === 9 && now.getMinutes() === 0 && localStorage.getItem('lastMorning') !== tKey) {
-                new Notification("Czas na wodę! ☀️", {body: `Twój cel: ${goal}ml`}); localStorage.setItem('lastMorning', tKey);
-            }
-            if (now.getHours() === 21 && now.getMinutes() === 0 && localStorage.getItem('lastEvening') !== tKey && total < goal && total > 0) {
-                new Notification("Prawie meta! 🌙", {body: `Brakuje ${Math.round(goal-total)}ml`}); localStorage.setItem('lastEvening', tKey);
-            }
-        }
-        setInterval(checkNotifications, 60000);
-
-        // --- FUNCTIONS ---
         function updateIconDisplay() {
             const s = document.getElementById('beverage');
             const txt = s.options[s.selectedIndex].text;
