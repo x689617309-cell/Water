@@ -34,7 +34,8 @@
         
         select { 
             -webkit-appearance: none; appearance: none; background-color: transparent; 
-            text-align: center; font-weight: bold; width: 100%; height: 100%;
+            text-align: center; text-align-last: center; /* Kluczowe dla wyśrodkowania */
+            font-weight: bold; width: 100%; height: 100%;
         }
         
         .sheet {
@@ -45,7 +46,7 @@
         .sheet.show { transform: translateY(0); }
         .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Nowy Pasek Postępu (Tube) */
+        /* Pasek Postępu (Tube) */
         .glass-tube {
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -90,12 +91,13 @@
     <div class="flex items-center justify-between w-full max-w-[320px] mb-12 px-2 z-20 gap-5">
         
         <div class="relative w-[76px] h-[76px]">
-            <select id="amount-select" class="liquid-glass w-full h-full rounded-full text-[#007AFF] text-xl outline-none cursor-pointer font-bold">
+            <select id="amount-select" onchange="checkCustomAmount(this)" class="liquid-glass w-full h-full rounded-full text-[#007AFF] text-xl outline-none cursor-pointer font-bold">
                 <option value="100">100</option>
                 <option value="250" selected>250</option>
                 <option value="330">330</option>
                 <option value="500">500</option>
                 <option value="1000">1000</option>
+                <option value="custom">✎ Inna</option>
             </select>
             <span class="absolute bottom-3 left-0 right-0 text-center text-[9px] text-slate-500 font-bold uppercase tracking-wide pointer-events-none">ML</span>
         </div>
@@ -109,8 +111,7 @@
         <div class="relative w-[76px] h-[76px]">
             <select id="beverage" onchange="checkAutoAdd()" class="liquid-glass w-full h-full rounded-full text-center text-2xl outline-none cursor-pointer">
                 <option value="1.0">💧</option>
-                <option value="0.99">🍵</option>
-                <option value="0.85">☕</option>
+                <option value="0.99">🍵</option> <option value="0.85">☕</option>
                 <option value="1.1">🥛</option>
                 <option value="0.9">⚡</option>
                 <option value="0.89">🥤</option>
@@ -158,6 +159,27 @@
         function toggleHistory() { renderHistory(); document.getElementById('history-sheet').classList.toggle('show'); document.getElementById('overlay').classList.remove('hidden'); }
         function closeHistory() { document.getElementById('history-sheet').classList.remove('show'); document.getElementById('overlay').classList.add('hidden'); }
 
+        // OBSŁUGA CUSTOM ML W LEWYM GUZIKU
+        function checkCustomAmount(select) {
+            if (select.value === 'custom') {
+                let n = prompt("Podaj ilość ml (max 10000):");
+                if (n) {
+                    let val = parseInt(n);
+                    if (val > 10000) { val = 10000; alert("Maksymalnie 10000 ml!"); }
+                    if (val > 0) {
+                        // Dodajemy nową opcję na górę listy, żeby była wybrana i widoczna
+                        let opt = new Option(val, val);
+                        select.add(opt, 0);
+                        select.value = val;
+                    } else {
+                         select.value = "250"; // powrót jeśli 0 lub anulowano
+                    }
+                } else {
+                    select.value = "250"; // powrót jeśli anulowano
+                }
+            }
+        }
+
         function setGoal() { 
             let n = prompt("Cel (ml) - max 10000:", goal); 
             if(n) { 
@@ -169,33 +191,20 @@
             } 
         }
 
-        // FUNKCJA DLA AUTOMATYCZNEGO DODAWANIA OWOCÓW
         function checkAutoAdd() {
             const select = document.getElementById('beverage');
             const value = select.value;
-            
-            // Sprawdzamy czy wybrano owoc (zaczyna się od "fruit-")
             if (value.startsWith('fruit-')) {
-                // Pobieramy współczynnik wody z atrybutu data-val
                 const option = select.options[select.selectedIndex];
                 const hydrationFactor = parseFloat(option.getAttribute('data-val'));
-                
-                // Dodajemy od razu
                 executeAdd(value, hydrationFactor);
-                
-                // Resetujemy menu z powrotem na wodę po 500ms, żeby można było dodać kolejny owoc
-                setTimeout(() => {
-                    select.value = "1.0";
-                }, 500);
+                setTimeout(() => { select.value = "1.0"; }, 500);
             }
         }
         
-        // STANDARDOWE DODAWANIE PLUSEM
         function addDrink() {
             const select = document.getElementById('beverage');
             const value = select.value;
-            
-            // Jeśli wybrano owoc i kliknięto plusa, też zadziała, ale normalnie zadziała przez onchange
             let factor = 1.0;
             if (value.startsWith('fruit-')) {
                 const option = select.options[select.selectedIndex];
@@ -203,7 +212,6 @@
             } else {
                 factor = parseFloat(value);
             }
-            
             executeAdd(value, factor);
         }
 
@@ -245,12 +253,8 @@
         function update() {
             document.getElementById('total').innerText = Math.round(total);
             document.getElementById('display-goal').innerText = goal;
-            
-            // Obliczanie procentów
             const percentage = Math.round((total / goal) * 100);
             document.getElementById('percent-display').innerText = percentage;
-            
-            // Animacja Paska (max 100%)
             const p = Math.min(percentage, 100);
             document.getElementById('progress-fill').style.height = p + "%";
         }
