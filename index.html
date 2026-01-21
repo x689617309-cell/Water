@@ -32,13 +32,11 @@
         }
         .liquid-glass:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.96); transition: all 0.2s; }
         
-        /* Styl dla obu selectów (lewy i prawy) */
         select { 
             -webkit-appearance: none; appearance: none; background-color: transparent; 
             text-align: center; font-weight: bold; width: 100%; height: 100%;
         }
         
-        /* Menu wysuwane (tylko dla historii) */
         .sheet {
             transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
             background: rgba(250, 250, 250, 0.85); backdrop-filter: blur(50px) saturate(180%); -webkit-backdrop-filter: blur(50px) saturate(180%);
@@ -46,6 +44,13 @@
         }
         .sheet.show { transform: translateY(0); }
         .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Nowy Pasek Postępu (Tube) */
+        .glass-tube {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body class="flex flex-col items-center h-screen font-sans overflow-hidden relative selection:bg-blue-200">
@@ -66,32 +71,19 @@
         <span>CEL:</span> <span id="display-goal" class="font-bold">2500</span> <span>ml</span>
     </button>
 
-    <div class="flex-grow flex flex-col justify-center items-center w-full relative z-0">
-        <div class="relative w-56 h-[45vh] drop-shadow-2xl">
-            <svg viewBox="0 0 100 220" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
-                <defs>
-                    <clipPath id="human-clip">
-                        <circle cx="50" cy="20" r="18" />
-                        <rect x="15" y="45" width="70" height="155" rx="20" ry="20" />
-                    </clipPath>
-                </defs>
-                
-                <g stroke="rgba(255,255,255,0.5)" stroke-width="1.5" fill="rgba(255,255,255,0.2)">
-                     <circle cx="50" cy="20" r="18" />
-                     <rect x="15" y="45" width="70" height="155" rx="20" ry="20" />
-                </g>
-
-                <g clip-path="url(#human-clip)">
-                    <rect id="water-rect" x="0" y="220" width="100" height="220" fill="url(#water-grad)" class="transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-                    </rect>
-                </g>
-                <linearGradient id="water-grad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#007AFF" /><stop offset="100%" stop-color="#5AC8FA" /></linearGradient>
-            </svg>
+    <div class="flex-grow flex flex-col justify-center items-center w-full relative z-0 gap-6">
+        
+        <div class="glass-tube relative w-24 h-[40vh] rounded-[40px] overflow-hidden drop-shadow-2xl">
+            <div id="progress-fill" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#007AFF] to-[#5AC8FA] w-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_30px_rgba(0,122,255,0.4)]" style="height: 0%"></div>
+            
+            <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent pointer-events-none"></div>
         </div>
         
-        <div class="mt-6 text-center z-10">
-            <div class="text-7xl font-thin text-slate-800 tracking-tighter drop-shadow-sm"><span id="total">0</span></div>
+        <div class="text-center z-10">
+            <div class="text-6xl font-thin text-slate-800 tracking-tighter drop-shadow-sm"><span id="total">0</span></div>
             <div class="text-slate-500 uppercase tracking-[0.2em] text-[10px] font-semibold mt-1">ml nawodnienia</div>
+            
+            <div class="mt-2 text-3xl font-bold text-[#007AFF] drop-shadow-sm"><span id="percent-display">0</span>%</div>
         </div>
     </div>
 
@@ -115,16 +107,20 @@
         </button>
 
         <div class="relative w-[76px] h-[76px]">
-            <select id="beverage" class="liquid-glass w-full h-full rounded-full text-center text-2xl outline-none cursor-pointer">
+            <select id="beverage" onchange="checkAutoAdd()" class="liquid-glass w-full h-full rounded-full text-center text-2xl outline-none cursor-pointer">
                 <option value="1.0">💧</option>
-                <option value="1.2">🥥</option>
                 <option value="0.99">🍵</option>
                 <option value="0.85">☕</option>
                 <option value="1.1">🥛</option>
                 <option value="0.9">⚡</option>
-                <option value="0.95">🍊</option>
-                <option value="0.96">🍎</option>
                 <option value="0.89">🥤</option>
+                <option value="1.2">🥥</option>
+                
+                <option value="fruit-banana" data-val="0.75">🍌</option>
+                <option value="fruit-mandarin" data-val="0.85">🍊</option>
+                <option value="fruit-apple" data-val="0.85">🍎</option>
+                <option value="fruit-grape" data-val="0.81">🍇</option>
+                <option value="fruit-watermelon" data-val="0.92">🍉</option>
             </select>
         </div>
     </div>
@@ -152,11 +148,13 @@
         let goal = parseInt(localStorage.getItem('goal')) || 2500;
         let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
         
-        const icons = { '1.0': '💧', '1.2': '🥥', '0.99': '🍵', '0.85': '☕', '1.1': '🥛', '0.9': '⚡', '0.95': '🍊', '0.96': '🍎', '0.89': '🥤' };
+        const iconMap = {
+            '1.0': '💧', '0.99': '🍵', '0.85': '☕', '1.1': '🥛', '0.9': '⚡', '0.89': '🥤', '1.2': '🥥',
+            'fruit-banana': '🍌', 'fruit-mandarin': '🍊', 'fruit-apple': '🍎', 'fruit-grape': '🍇', 'fruit-watermelon': '🍉'
+        };
 
         document.getElementById('history-date').innerText = new Date().toLocaleDateString('pl-PL', {weekday: 'long', day: 'numeric', month: 'long'});
 
-        // Funkcje tylko dla historii
         function toggleHistory() { renderHistory(); document.getElementById('history-sheet').classList.toggle('show'); document.getElementById('overlay').classList.remove('hidden'); }
         function closeHistory() { document.getElementById('history-sheet').classList.remove('show'); document.getElementById('overlay').classList.add('hidden'); }
 
@@ -170,15 +168,62 @@
                 update(); 
             } 
         }
+
+        // FUNKCJA DLA AUTOMATYCZNEGO DODAWANIA OWOCÓW
+        function checkAutoAdd() {
+            const select = document.getElementById('beverage');
+            const value = select.value;
+            
+            // Sprawdzamy czy wybrano owoc (zaczyna się od "fruit-")
+            if (value.startsWith('fruit-')) {
+                // Pobieramy współczynnik wody z atrybutu data-val
+                const option = select.options[select.selectedIndex];
+                const hydrationFactor = parseFloat(option.getAttribute('data-val'));
+                
+                // Dodajemy od razu
+                executeAdd(value, hydrationFactor);
+                
+                // Resetujemy menu z powrotem na wodę po 500ms, żeby można było dodać kolejny owoc
+                setTimeout(() => {
+                    select.value = "1.0";
+                }, 500);
+            }
+        }
         
+        // STANDARDOWE DODAWANIE PLUSEM
         function addDrink() {
-            // Pobieramy wartość z nowego selecta po lewej
+            const select = document.getElementById('beverage');
+            const value = select.value;
+            
+            // Jeśli wybrano owoc i kliknięto plusa, też zadziała, ale normalnie zadziała przez onchange
+            let factor = 1.0;
+            if (value.startsWith('fruit-')) {
+                const option = select.options[select.selectedIndex];
+                factor = parseFloat(option.getAttribute('data-val'));
+            } else {
+                factor = parseFloat(value);
+            }
+            
+            executeAdd(value, factor);
+        }
+
+        function executeAdd(typeKey, factor) {
             const currentAmt = parseInt(document.getElementById('amount-select').value);
-            const bevVal = document.getElementById('beverage').value;
-            const realHydration = currentAmt * parseFloat(bevVal);
+            const realHydration = currentAmt * factor;
+            
             total += realHydration;
-            const entry = { id: Date.now(), amount: currentAmt, icon: icons[bevVal] || '🥤', hydration: realHydration, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-            historyLog.unshift(entry); saveData(); update();
+            
+            const entry = { 
+                id: Date.now(), 
+                amount: currentAmt, 
+                icon: iconMap[typeKey] || '🥤', 
+                hydration: realHydration, 
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+            };
+            
+            historyLog.unshift(entry); 
+            saveData(); 
+            update();
         }
 
         function resetAll() { if(confirm("Usunąć całą historię z dziś?")) { total = 0; historyLog = []; saveData(); update(); closeHistory(); } }
@@ -196,13 +241,18 @@
         }
 
         function saveData() { localStorage.setItem('total', total); localStorage.setItem('historyLog', JSON.stringify(historyLog)); }
+        
         function update() {
             document.getElementById('total').innerText = Math.round(total);
             document.getElementById('display-goal').innerText = goal;
-            const p = Math.min((total / goal), 1);
-            // 220 = dół SVG, 0 = góra
-            const waterLevel = 220 - (p * 220); 
-            document.getElementById('water-rect').setAttribute('y', waterLevel);
+            
+            // Obliczanie procentów
+            const percentage = Math.round((total / goal) * 100);
+            document.getElementById('percent-display').innerText = percentage;
+            
+            // Animacja Paska (max 100%)
+            const p = Math.min(percentage, 100);
+            document.getElementById('progress-fill').style.height = p + "%";
         }
 
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
