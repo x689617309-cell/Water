@@ -32,11 +32,15 @@
         }
         .liquid-glass:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.96); transition: all 0.2s; }
         
+        /* Select settings */
         select { 
             -webkit-appearance: none; appearance: none; background-color: transparent; 
-            text-align: center; text-align-last: center; /* Kluczowe dla wyśrodkowania */
+            text-align: center; text-align-last: center;
             font-weight: bold; width: 100%; height: 100%;
+            font-size: 24px; /* Duże emoji */
         }
+        /* Mniejsza czcionka dla opcji w środku (żeby tekst się mieścił w rolce iOS) */
+        option { font-size: 16px; color: black; }
         
         .sheet {
             transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
@@ -73,17 +77,13 @@
     </button>
 
     <div class="flex-grow flex flex-col justify-center items-center w-full relative z-0 gap-6">
-        
         <div class="glass-tube relative w-24 h-[40vh] rounded-[40px] overflow-hidden drop-shadow-2xl">
             <div id="progress-fill" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#007AFF] to-[#5AC8FA] w-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_30px_rgba(0,122,255,0.4)]" style="height: 0%"></div>
-            
             <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent pointer-events-none"></div>
         </div>
-        
         <div class="text-center z-10">
             <div class="text-6xl font-thin text-slate-800 tracking-tighter drop-shadow-sm"><span id="total">0</span></div>
             <div class="text-slate-500 uppercase tracking-[0.2em] text-[10px] font-semibold mt-1">ml nawodnienia</div>
-            
             <div class="mt-2 text-3xl font-bold text-[#007AFF] drop-shadow-sm"><span id="percent-display">0</span>%</div>
         </div>
     </div>
@@ -110,18 +110,25 @@
 
         <div class="relative w-[76px] h-[76px]">
             <select id="beverage" onchange="checkAutoAdd()" class="liquid-glass w-full h-full rounded-full text-center text-2xl outline-none cursor-pointer">
-                <option value="1.0">💧</option>
-                <option value="0.99">🍵</option> <option value="0.85">☕</option>
-                <option value="1.1">🥛</option>
-                <option value="0.9">⚡</option>
-                <option value="0.89">🥤</option>
-                <option value="1.2">🥥</option>
-                
-                <option value="fruit-banana" data-val="0.75">🍌</option>
-                <option value="fruit-mandarin" data-val="0.85">🍊</option>
-                <option value="fruit-apple" data-val="0.85">🍎</option>
-                <option value="fruit-grape" data-val="0.81">🍇</option>
-                <option value="fruit-watermelon" data-val="0.92">🍉</option>
+                <optgroup label="Napoje">
+                    <option value="1.0">💧 Woda</option>
+                    <option value="0.85">☕ Kawa</option>
+                    <option value="1.0">☕🥛 Kawa z mlek.</option>
+                    <option value="1.15">🥥 Woda Koko</option>
+                    <option value="1.15">🥛 Mleko</option>
+                    <option value="0.9">⚡ Energetyk</option>
+                    <option value="0.9">🥤 CocaCola</option>
+                    <option value="0.98">🍵 Herbata</option>
+                    <option value="0.6">🍸 Alkohol</option>
+                </optgroup>
+                <optgroup label="Owoce (Auto ML)">
+                    <option value="fruit-banana" data-ml="90">🍌 Banan</option>
+                    <option value="fruit-mandarin" data-ml="65">🍊 Mandarynka</option>
+                    <option value="fruit-kiwi" data-ml="60">🥝 Kiwi</option>
+                    <option value="fruit-apple" data-ml="150">🍎 Jabłko</option>
+                    <option value="fruit-watermelon" data-ml="200">🍉 Arbuz</option>
+                    <option value="fruit-pineapple" data-ml="140">🍍 Ananas</option>
+                </optgroup>
             </select>
         </div>
     </div>
@@ -149,17 +156,41 @@
         let goal = parseInt(localStorage.getItem('goal')) || 2500;
         let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
         
+        // MAPA IKON DLA HISTORII (Musimy mapować po nazwach lub wartościach)
+        // Dla owoców użyjemy kluczy 'fruit-...'
         const iconMap = {
-            '1.0': '💧', '0.99': '🍵', '0.85': '☕', '1.1': '🥛', '0.9': '⚡', '0.89': '🥤', '1.2': '🥥',
-            'fruit-banana': '🍌', 'fruit-mandarin': '🍊', 'fruit-apple': '🍎', 'fruit-grape': '🍇', 'fruit-watermelon': '🍉'
+            '1.0': '💧', '0.85': '☕', '1.0_milk': '☕🥛', '1.15_coco': '🥥', '1.15_milk': '🥛', 
+            '0.9_energy': '⚡', '0.9_coke': '🥤', '0.98': '🍵', '0.6': '🍸',
+            'fruit-banana': '🍌', 'fruit-mandarin': '🍊', 'fruit-kiwi': '🥝',
+            'fruit-apple': '🍎', 'fruit-watermelon': '🍉', 'fruit-pineapple': '🍍'
         };
+
+        // Pomocnicza funkcja do pobierania ikony na podstawie wybranego napoju
+        function getIconForValue(value, selectElement) {
+            // Jeśli to owoc
+            if(value.startsWith('fruit-')) return iconMap[value];
+            
+            // Jeśli to napój, sprawdzamy tekst opcji, bo wartości mogą się powtarzać (np. 0.9)
+            const index = selectElement.selectedIndex;
+            const text = selectElement.options[index].text;
+            if(text.includes('Woda Koko')) return '🥥';
+            if(text.includes('Mleko')) return '🥛';
+            if(text.includes('Energetyk')) return '⚡';
+            if(text.includes('CocaCola')) return '🥤';
+            if(text.includes('Kawa z mlek')) return '☕🥛';
+            if(text.includes('Alkohol')) return '🍸';
+            if(value === '1.0') return '💧';
+            if(value === '0.85') return '☕';
+            if(value === '0.98') return '🍵';
+            
+            return '🥤';
+        }
 
         document.getElementById('history-date').innerText = new Date().toLocaleDateString('pl-PL', {weekday: 'long', day: 'numeric', month: 'long'});
 
         function toggleHistory() { renderHistory(); document.getElementById('history-sheet').classList.toggle('show'); document.getElementById('overlay').classList.remove('hidden'); }
         function closeHistory() { document.getElementById('history-sheet').classList.remove('show'); document.getElementById('overlay').classList.add('hidden'); }
 
-        // OBSŁUGA CUSTOM ML W LEWYM GUZIKU
         function checkCustomAmount(select) {
             if (select.value === 'custom') {
                 let n = prompt("Podaj ilość ml (max 10000):");
@@ -167,16 +198,11 @@
                     let val = parseInt(n);
                     if (val > 10000) { val = 10000; alert("Maksymalnie 10000 ml!"); }
                     if (val > 0) {
-                        // Dodajemy nową opcję na górę listy, żeby była wybrana i widoczna
                         let opt = new Option(val, val);
                         select.add(opt, 0);
                         select.value = val;
-                    } else {
-                         select.value = "250"; // powrót jeśli 0 lub anulowano
-                    }
-                } else {
-                    select.value = "250"; // powrót jeśli anulowano
-                }
+                    } else select.value = "250";
+                } else select.value = "250";
             }
         }
 
@@ -194,10 +220,12 @@
         function checkAutoAdd() {
             const select = document.getElementById('beverage');
             const value = select.value;
+            // Jeśli to owoc (ma atrybut data-ml)
             if (value.startsWith('fruit-')) {
                 const option = select.options[select.selectedIndex];
-                const hydrationFactor = parseFloat(option.getAttribute('data-val'));
-                executeAdd(value, hydrationFactor);
+                const fixedMl = parseFloat(option.getAttribute('data-ml'));
+                // Dla owoców fixedMl to ilość, a nawodnienie to 100% tej ilości (czyli factor=1 relative to fruit water content)
+                executeAdd(value, fixedMl, true, select);
                 setTimeout(() => { select.value = "1.0"; }, 500);
             }
         }
@@ -205,26 +233,41 @@
         function addDrink() {
             const select = document.getElementById('beverage');
             const value = select.value;
-            let factor = 1.0;
+            
+            // Jeśli ktoś kliknie plusa mając wybrany owoc (rzadkie, ale możliwe)
             if (value.startsWith('fruit-')) {
                 const option = select.options[select.selectedIndex];
-                factor = parseFloat(option.getAttribute('data-val'));
+                const fixedMl = parseFloat(option.getAttribute('data-ml'));
+                executeAdd(value, fixedMl, true, select);
             } else {
-                factor = parseFloat(value);
+                // Napój - pobieramy współczynnik z value
+                const factor = parseFloat(value);
+                executeAdd(value, factor, false, select);
             }
-            executeAdd(value, factor);
         }
 
-        function executeAdd(typeKey, factor) {
-            const currentAmt = parseInt(document.getElementById('amount-select').value);
-            const realHydration = currentAmt * factor;
+        function executeAdd(typeKey, factorOrFixedMl, isFruit, selectElement) {
+            let entryAmount, realHydration;
+
+            if (isFruit) {
+                // Dla owoców ignorujemy lewy guzik. Ilość to sztywna wartość z owocu.
+                entryAmount = factorOrFixedMl;
+                realHydration = entryAmount; // Zakładamy, że 100% wody z owocu nawadnia
+            } else {
+                // Dla napojów bierzemy ilość z lewego guzika
+                const currentAmt = parseInt(document.getElementById('amount-select').value);
+                entryAmount = currentAmt;
+                realHydration = currentAmt * factorOrFixedMl;
+            }
             
             total += realHydration;
             
+            const icon = getIconForValue(typeKey, selectElement);
+            
             const entry = { 
                 id: Date.now(), 
-                amount: currentAmt, 
-                icon: iconMap[typeKey] || '🥤', 
+                amount: entryAmount, 
+                icon: icon, 
                 hydration: realHydration, 
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
             };
