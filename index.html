@@ -22,7 +22,7 @@
         }
         @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* PRAWDZIWY LIQUID GLASS (Apple Style) */
+        /* LIQUID GLASS */
         .liquid-glass {
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(40px) saturate(200%);
@@ -63,18 +63,25 @@
 
     <div class="flex-grow flex flex-col justify-center items-center w-full relative z-0">
         <div class="relative w-56 h-[45vh] drop-shadow-2xl">
-            <svg viewBox="0 0 100 200" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+            <svg viewBox="0 0 100 220" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
                 <defs>
                     <clipPath id="human-clip">
-                        <path d="M50,10 a20,20 0 1,0 0,40 a20,20 0 1,0 0,-40 M30,60 h40 a10,10 0 0,1 10,10 v120 a10,10 0 0,1 -10,10 h-15 v-70 h-10 v70 h-15 a10,10 0 0,1 -10,-10 v-120 a10,10 0 0,1 10,-10 z" />
+                        <circle cx="50" cy="25" r="16" />
+                        <rect x="8" y="48" width="16" height="85" rx="8" />
+                        <rect x="76" y="48" width="16" height="85" rx="8" />
+                        <path d="M30,48 h40 a8,8 0 0,1 8,8 v150 a8,8 0 0,1 -8,8 h-13 v-80 h-10 v80 h-13 a8,8 0 0,1 -8,-8 v-150 a8,8 0 0,1 8,-8 z" />
                     </clipPath>
                 </defs>
                 
-                <path d="M50,10 a20,20 0 1,0 0,40 a20,20 0 1,0 0,-40 M30,60 h40 a10,10 0 0,1 10,10 v120 a10,10 0 0,1 -10,10 h-15 v-70 h-10 v70 h-15 a10,10 0 0,1 -10,-10 v-120 a10,10 0 0,1 10,-10 z" 
-                      fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+                <g stroke="rgba(255,255,255,0.5)" stroke-width="1.5" fill="rgba(255,255,255,0.2)">
+                     <circle cx="50" cy="25" r="16" />
+                     <rect x="8" y="48" width="16" height="85" rx="8" />
+                     <rect x="76" y="48" width="16" height="85" rx="8" />
+                     <path d="M30,48 h40 a8,8 0 0,1 8,8 v150 a8,8 0 0,1 -8,8 h-13 v-80 h-10 v80 h-13 a8,8 0 0,1 -8,-8 v-150 a8,8 0 0,1 8,-8 z" />
+                </g>
 
                 <g clip-path="url(#human-clip)">
-                    <rect id="water-rect" x="0" y="200" width="100" height="200" fill="url(#water-grad)" class="transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                    <rect id="water-rect" x="0" y="220" width="100" height="220" fill="url(#water-grad)" class="transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
                     </rect>
                 </g>
                 <linearGradient id="water-grad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#007AFF" /><stop offset="100%" stop-color="#5AC8FA" /></linearGradient>
@@ -94,14 +101,15 @@
             <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wide">ML</span>
         </button>
 
-        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-[#007AFF] text-5xl font-light shadow-2xl hover:scale-105 transition duration-300">
-            +
+        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-[#007AFF] shadow-2xl hover:scale-105 transition duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
         </button>
 
         <div class="relative w-[76px] h-[76px]">
             <select id="beverage" class="liquid-glass w-full h-full rounded-full text-center text-2xl outline-none cursor-pointer">
-                <option value="1.0">💧</option><option value="1.2">🥥</option><option value="0.92">🍉</option><option value="0.8">☕</option><option value="0.75">🍌</option>
-            </select>
+                <option value="1.0">💧</option>   <option value="1.2">🥥</option>   <option value="0.99">🍵</option>  <option value="0.85">☕</option>  <option value="1.1">🥛</option>   <option value="0.9">⚡</option>    <option value="0.95">🍊</option>  <option value="0.96">🍎</option>  <option value="0.89">🥤</option>  </select>
         </div>
     </div>
 
@@ -141,7 +149,19 @@
         let goal = parseInt(localStorage.getItem('goal')) || 2500;
         let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
         let currentAmt = 250;
-        const icons = { '1.0': '💧', '1.2': '🥥', '0.92': '🍉', '0.8': '☕', '0.75': '🍌' };
+        
+        // ZAKTUALIZOWANA LISTA IKON (dla historii)
+        const icons = { 
+            '1.0': '💧', 
+            '1.2': '🥥', 
+            '0.99': '🍵', 
+            '0.85': '☕', 
+            '1.1': '🥛', 
+            '0.9': '⚡', 
+            '0.95': '🍊', 
+            '0.96': '🍎',
+            '0.89': '🥤'
+        };
 
         document.getElementById('history-date').innerText = new Date().toLocaleDateString('pl-PL', {weekday: 'long', day: 'numeric', month: 'long'});
 
@@ -150,13 +170,32 @@
         function closeAll() { document.querySelectorAll('.sheet').forEach(el => el.classList.remove('show')); document.getElementById('overlay').classList.add('hidden'); }
 
         function selectAmt(v) { currentAmt = v; document.getElementById('btn-amount').innerText = v; closeAll(); }
-        function customAmt() { let n = prompt("Ile ml?", currentAmt); if(n) selectAmt(parseInt(n)); else closeAll(); }
-        function setGoal() { let n = prompt("Cel (ml):", goal); if(n) { goal = parseInt(n); localStorage.setItem('goal', goal); update(); } }
+        
+        function customAmt() { 
+            let n = prompt("Ile ml? (max 10000)", currentAmt); 
+            if(n) { 
+                let parsed = parseInt(n);
+                if (parsed > 10000) { parsed = 10000; alert("Maksymalnie 10000 ml!"); }
+                selectAmt(parsed); 
+            } else closeAll(); 
+        }
+
+        function setGoal() { 
+            let n = prompt("Cel (ml) - max 10000:", goal); 
+            if(n) { 
+                let parsed = parseInt(n);
+                if (parsed > 10000) { parsed = 10000; alert("Maksymalnie 10000 ml!"); }
+                goal = parsed; 
+                localStorage.setItem('goal', goal); 
+                update(); 
+            } 
+        }
         
         function addDrink() {
             const bevVal = document.getElementById('beverage').value;
             const realHydration = currentAmt * parseFloat(bevVal);
             total += realHydration;
+            // Pobieramy ikonę na podstawie wartości
             const entry = { id: Date.now(), amount: currentAmt, icon: icons[bevVal] || '🥤', hydration: realHydration, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
             historyLog.unshift(entry); saveData(); update();
         }
@@ -180,8 +219,7 @@
             document.getElementById('total').innerText = Math.round(total);
             document.getElementById('display-goal').innerText = goal;
             const p = Math.min((total / goal), 1);
-            // 200 = wysokość SVG, wypełnia do 10 (szyja)
-            const waterLevel = 200 - (p * 190); 
+            const waterLevel = 220 - (p * 220); 
             document.getElementById('water-rect').setAttribute('y', waterLevel);
         }
 
