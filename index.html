@@ -22,40 +22,33 @@
         .blob { filter: blur(60px); mix-blend-mode: multiply; opacity: 0.4; transition: all 0.5s; }
         body.dark .blob { mix-blend-mode: normal; opacity: 0.25; filter: blur(80px); }
 
-        /* --- LIQUID GLASS Z WOLNIEJSZYM EFEKTEM POP --- */
+        /* --- LIQUID GLASS --- */
         .liquid-glass {
             background: rgba(255, 255, 255, 0.3); 
             backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.4);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            
-            /* ZMIANA TUTAJ: Zwiększono czas z 0.15s na 0.35s dla wolniejszego powrotu */
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s;
             transform: scale(1);
         }
-        
         body.dark .liquid-glass {
-            background: rgba(40, 40, 40, 0.3); 
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(40, 40, 40, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
-        
-        /* EFEKT POWIĘKSZENIA (POP) NA KLIK */
         .liquid-glass:active { 
             transform: scale(1.15) !important;
             background: rgba(255, 255, 255, 0.5);
-            /* Czas wejścia w stan aktywny pozostaje szybki */
             transition: transform 0.1s ease-out, background-color 0.1s;
         }
-        body.dark .liquid-glass:active {
-            background: rgba(60, 60, 60, 0.5);
-        }
+        body.dark .liquid-glass:active { background: rgba(60, 60, 60, 0.5); }
 
         select { -webkit-appearance: none; appearance: none; background: transparent; text-align: center; text-align-last: center; font-weight: bold; width: 100%; height: 100%; }
         option { color: black; }
+
         .glass-tube { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 0 20px rgba(255,255,255,0.2); }
         body.dark .glass-tube { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); }
+
         .sheet {
             transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
             background: rgba(250, 250, 250, 0.9); backdrop-filter: blur(50px) saturate(180%);
@@ -63,7 +56,9 @@
         }
         body.dark .sheet { background: rgba(25, 25, 25, 0.85); border-top: 1px solid rgba(255,255,255,0.15); color: white; box-shadow: 0 -10px 50px rgba(0,0,0,0.5); }
         .sheet.show { transform: translateY(0); }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
         .switch-container { position: relative; width: 50px; height: 30px; }
         .switch-input { opacity: 0; width: 0; height: 0; }
         .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -71,10 +66,12 @@
         .switch-slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .switch-input:checked + .switch-slider { background-color: #34C759; }
         .switch-input:checked + .switch-slider:before { transform: translateX(20px); }
+
         .chart-bar-bg { background: rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden; position: relative; }
         body.dark .chart-bar-bg { background: rgba(255,255,255,0.1); }
         .chart-fill { background: #007AFF; transition: height 1s ease; border-radius: 6px; position: absolute; bottom: 0; width: 100%; }
         body.dark .chart-fill { background: #409CFF; }
+        
         .text-accent { color: #007AFF; } body.dark .text-accent { color: #409CFF; }
         .text-sub { color: #64748b; } body.dark .text-sub { color: #94a3b8; }
     </style>
@@ -104,7 +101,7 @@
     </button>
 
     <button onclick="setGoal()" class="liquid-glass px-6 py-3 rounded-full font-semibold text-sm mt-20 mb-4 z-10 flex items-center gap-2 text-current cursor-pointer select-none">
-        <span class="opacity-70">CEL:</span> <span id="display-goal" class="font-bold">2500</span> <span>ml</span>
+        <span class="opacity-70" id="lbl-goal">CEL:</span> <span id="display-goal" class="font-bold">2500</span> <span>ml</span>
     </button>
 
     <div class="flex-grow flex flex-col justify-center items-center w-full relative z-0 gap-6">
@@ -114,8 +111,13 @@
         </div>
         <div class="text-center z-10">
             <div class="text-6xl font-thin tracking-tighter drop-shadow-sm text-current"><span id="total">0</span></div>
-            <div class="text-sub uppercase tracking-[0.2em] text-[10px] font-semibold mt-1">ml nawodnienia</div>
-            <div class="mt-2 text-3xl font-bold text-accent drop-shadow-sm"><span id="percent-display">0</span>%</div>
+            <div class="text-sub uppercase tracking-[0.2em] text-[10px] font-semibold mt-1" id="lbl-hydro">ml nawodnienia</div>
+            <div class="mt-2 flex flex-col items-center">
+                <div class="text-3xl font-bold text-accent drop-shadow-sm"><span id="percent-display">0</span>%</div>
+                <div class="text-sm font-bold text-orange-500 mt-1 flex items-center gap-1 transition-all duration-500" id="streak-container">
+                    <span>🔥</span> <span id="streak-val">0</span> <span id="lbl-days">dni</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -134,15 +136,25 @@
         <div class="relative w-[76px] h-[76px] liquid-glass rounded-full flex items-center justify-center select-none">
             <span id="beverage-icon-display" class="text-3xl pointer-events-none">💧</span>
             <select id="beverage" onchange="updateIconDisplay(); checkAutoAdd();" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                <optgroup label="Napoje">
-                    <option value="1.0">💧 Woda</option><option value="0.9">🧃 Sok</option><option value="0.85">☕ Kawa</option><option value="1.0">☕🥛 Kawa z mlek.</option>
-                    <option value="1.15">🥥 Woda Koko</option><option value="1.15">🥛 Mleko</option><option value="0.9">⚡ Energetyk</option>
-                    <option value="0.9">🥤 CocaCola</option><option value="0.98">🍵 Herbata</option><option value="0.6">🍸 Alkohol</option>
+                <optgroup label="Napoje" id="grp-drinks">
+                    <option value="1.0">💧 Water</option>
+                    <option value="0.9">🧃 Juice</option>
+                    <option value="0.85">☕ Coffee</option>
+                    <option value="1.0">☕🥛 Coffee+Milk</option>
+                    <option value="1.15">🥥 Coco Water</option>
+                    <option value="1.15">🥛 Milk</option>
+                    <option value="0.9">⚡ Energy</option>
+                    <option value="0.9">🥤 Soda</option>
+                    <option value="0.98">🍵 Tea</option>
+                    <option value="0.6">🍸 Alcohol</option>
                 </optgroup>
-                <optgroup label="Owoce (Auto ML)">
-                    <option value="fruit-banana" data-ml="90">🍌 Banan</option><option value="fruit-mandarin" data-ml="65">🍊 Mandarynka</option>
-                    <option value="fruit-kiwi" data-ml="60">🥝 Kiwi</option><option value="fruit-apple" data-ml="150">🍎 Jabłko</option>
-                    <option value="fruit-watermelon" data-ml="200">🍉 Arbuz</option><option value="fruit-pineapple" data-ml="140">🍍 Ananas</option>
+                <optgroup label="Owoce" id="grp-fruits">
+                    <option value="fruit-banana" data-ml="90">🍌 Banana</option>
+                    <option value="fruit-mandarin" data-ml="65">🍊 Mandarin</option>
+                    <option value="fruit-kiwi" data-ml="60">🥝 Kiwi</option>
+                    <option value="fruit-apple" data-ml="150">🍎 Apple</option>
+                    <option value="fruit-watermelon" data-ml="200">🍉 Watermelon</option>
+                    <option value="fruit-pineapple" data-ml="140">🍍 Pineapple</option>
                 </optgroup>
             </select>
         </div>
@@ -153,42 +165,61 @@
     <div id="history-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[70vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
         <div class="w-10 h-1 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
         <div class="flex justify-between items-center mb-4 px-2">
-            <h2 class="font-bold text-2xl">Dzisiaj</h2>
+            <h2 class="font-bold text-2xl" id="lbl-today">Dzisiaj</h2>
             <span class="text-sub text-sm font-medium" id="history-date">Data</span>
         </div>
         <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-2"></div>
         <div class="pt-2 border-t border-black/5 dark:border-white/10 flex-shrink-0 space-y-3 mt-2">
-            <button onclick="resetAll()" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
+            <button onclick="resetAll()" id="btn-reset" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                Zresetuj dzień
+                <span id="lbl-reset">Zresetuj dzień</span>
             </button>
-            <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeAll()">Zamknij</button>
+            <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeAll()" id="btn-close-hist">Zamknij</button>
         </div>
     </div>
 
     <div id="stats-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[80vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
         <div class="w-10 h-1 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
-        <h2 class="font-bold text-2xl mb-6 px-2">Statystyki & Opcje</h2>
+        <h2 class="font-bold text-2xl mb-6 px-2" id="lbl-stats">Statystyki</h2>
+        
         <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-5 mb-4 border border-white/40 dark:border-white/10 shadow-sm flex-shrink-0">
             <div class="flex justify-between items-center mb-4">
-                <div class="text-xs text-sub font-bold uppercase">Ostatnie 7 dni</div>
-                <div class="text-xs font-bold text-accent">Średnia: <span id="weekly-avg">0</span> ml</div>
+                <div class="text-xs text-sub font-bold uppercase" id="lbl-week">Ostatnie 7 dni</div>
+                <div class="text-xs font-bold text-accent"><span id="lbl-avg">Średnia</span>: <span id="weekly-avg">0</span> ml</div>
             </div>
-            <div class="flex justify-between items-end h-32 gap-2" id="weekly-chart"></div>
-            <div class="mt-3 text-[10px] text-center text-sub">Najlepszy dzień: <span id="best-day-val" class="text-accent font-bold">0</span> ml</div>
+            <div class="flex justify-between items-end h-24 gap-2" id="weekly-chart"></div>
+            <div class="mt-3 text-[10px] text-center text-sub"><span id="lbl-best">Najlepszy</span>: <span id="best-day-val" class="text-accent font-bold">0</span> ml</div>
         </div>
-        <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-4 mb-auto border border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center flex-shrink-0">
+
+        <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-4 mb-2 border border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center flex-shrink-0">
             <div class="flex items-center gap-3">
                 <span class="text-xl">🔔</span>
-                <span class="font-bold">Powiadomienia</span>
+                <span class="font-bold" id="lbl-notif">Powiadomienia</span>
             </div>
             <label class="switch-container">
                 <input type="checkbox" id="notif-toggle" class="switch-input" onchange="toggleNotifications()">
                 <span class="switch-slider"></span>
             </label>
         </div>
+
+        <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-4 mb-auto border border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">🌍</span>
+                <span class="font-bold" id="lbl-lang">Język</span>
+            </div>
+            <div class="relative w-24 h-10">
+                <select id="lang-select" onchange="changeLanguage(this.value)" class="absolute inset-0 w-full h-full bg-transparent font-bold text-accent outline-none">
+                    <option value="pl">🇵🇱 PL</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="ru">🇷🇺 RU</option>
+                    <option value="cn">🇨🇳 CN</option>
+                </select>
+            </div>
+        </div>
+
         <div class="pt-2 flex-shrink-0">
-             <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeAll()">Zamknij</button>
+             <button class="w-full bg-white dark:bg-white/10 dark:text-white py-4 rounded-[20px] font-bold text-slate-900 shadow-sm" onclick="closeAll()" id="btn-close-stats">Zamknij</button>
         </div>
     </div>
 
@@ -198,7 +229,88 @@
         let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
         let weeklyRecord = JSON.parse(localStorage.getItem('weeklyRecord')) || {};
         let notificationsEnabled = localStorage.getItem('notifications') === 'true';
+        let currentLang = localStorage.getItem('lang') || 'pl';
+        let streak = parseInt(localStorage.getItem('streak')) || 0;
+        let lastStreakDate = localStorage.getItem('lastStreakDate') || '';
 
+        // --- TŁUMACZENIA ---
+        const langData = {
+            pl: {
+                goal: "CEL:", hydro: "ml nawodnienia", today: "Dzisiaj", stats: "Statystyki", 
+                week: "Ostatnie 7 dni", avg: "Średnia", best: "Najlepszy", notif: "Powiadomienia", 
+                lang: "Język", reset: "Zresetuj dzień", close: "Zamknij", days: "dni",
+                msg_am: "Czas na wodę! ☀️", msg_pm: "Prawie meta! 🌙", msg_on: "Włączone! 💧",
+                drinks: ["Woda", "Sok", "Kawa", "Kawa+Mleko", "Woda Koko", "Mleko", "Energetyk", "Cola", "Herbata", "Alkohol"],
+                fruits: ["Banan", "Mandarynka", "Kiwi", "Jabłko", "Arbuz", "Ananas"]
+            },
+            en: {
+                goal: "GOAL:", hydro: "ml hydration", today: "Today", stats: "Statistics", 
+                week: "Last 7 days", avg: "Average", best: "Best", notif: "Notifications", 
+                lang: "Language", reset: "Reset Day", close: "Close", days: "days",
+                msg_am: "Time for water! ☀️", msg_pm: "Almost there! 🌙", msg_on: "Enabled! 💧",
+                drinks: ["Water", "Juice", "Coffee", "Coffee+Milk", "Coco Water", "Milk", "Energy", "Soda", "Tea", "Alcohol"],
+                fruits: ["Banana", "Mandarin", "Kiwi", "Apple", "Watermelon", "Pineapple"]
+            },
+            es: {
+                goal: "META:", hydro: "ml hidratación", today: "Hoy", stats: "Estadísticas", 
+                week: "Últimos 7 días", avg: "Media", best: "Mejor", notif: "Notificaciones", 
+                lang: "Idioma", reset: "Reiniciar día", close: "Cerrar", days: "días",
+                msg_am: "¡Hora del agua! ☀️", msg_pm: "¡Casi listo! 🌙", msg_on: "¡Activado! 💧",
+                drinks: ["Agua", "Jugo", "Café", "Café+Leche", "Agua Coco", "Leche", "Energía", "Refresco", "Té", "Alcohol"],
+                fruits: ["Plátano", "Mandarina", "Kiwi", "Manzana", "Sandía", "Piña"]
+            },
+            ru: {
+                goal: "ЦЕЛЬ:", hydro: "мл гидратации", today: "Сегодня", stats: "Статистика", 
+                week: "Последние 7 дней", avg: "Среднее", best: "Лучший", notif: "Уведомления", 
+                lang: "Язык", reset: "Сбросить день", close: "Закрыть", days: "дней",
+                msg_am: "Время воды! ☀️", msg_pm: "Почти у цели! 🌙", msg_on: "Включено! 💧",
+                drinks: ["Вода", "Сок", "Кофе", "Кофе+Молоко", "Кокос. вода", "Молоко", "Энергетик", "Газировка", "Чай", "Алкоголь"],
+                fruits: ["Банан", "Мандарин", "Киви", "Яблоко", "Арбуз", "Ананас"]
+            },
+            cn: {
+                goal: "目标:", hydro: "毫升 水分", today: "今天", stats: "统计", 
+                week: "最近7天", avg: "平均", best: "最佳", notif: "通知", 
+                lang: "语言", reset: "重置", close: "关闭", days: "天",
+                msg_am: "该喝水了! ☀️", msg_pm: "快到了! 🌙", msg_on: "已启用! 💧",
+                drinks: ["水", "果汁", "咖啡", "咖啡+牛奶", "椰子水", "牛奶", "能量饮料", "汽水", "茶", "酒精"],
+                fruits: ["香蕉", "橘子", "猕猴桃", "苹果", "西瓜", "菠萝"]
+            }
+        };
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            const d = langData[lang];
+            
+            document.getElementById('lbl-goal').innerText = d.goal;
+            document.getElementById('lbl-hydro').innerText = d.hydro;
+            document.getElementById('lbl-today').innerText = d.today;
+            document.getElementById('lbl-stats').innerText = d.stats;
+            document.getElementById('lbl-week').innerText = d.week;
+            document.getElementById('lbl-avg').innerText = d.avg;
+            document.getElementById('lbl-best').innerText = d.best;
+            document.getElementById('lbl-notif').innerText = d.notif;
+            document.getElementById('lbl-lang').innerText = d.lang;
+            document.getElementById('lbl-reset').innerText = d.reset;
+            document.getElementById('btn-close-hist').innerText = d.close;
+            document.getElementById('btn-close-stats').innerText = d.close;
+            document.getElementById('lbl-days').innerText = d.days;
+
+            // Update Select Options Text
+            const drinkOpts = document.getElementById('grp-drinks').getElementsByTagName('option');
+            const fruitOpts = document.getElementById('grp-fruits').getElementsByTagName('option');
+            
+            // Emoji prefixes to keep
+            const dEmo = ["💧", "🧃", "☕", "☕🥛", "🥥", "🥛", "⚡", "🥤", "🍵", "🍸"];
+            const fEmo = ["🍌", "🍊", "🥝", "🍎", "🍉", "🍍"];
+
+            for(let i=0; i<drinkOpts.length; i++) drinkOpts[i].text = dEmo[i] + " " + d.drinks[i];
+            for(let i=0; i<fruitOpts.length; i++) fruitOpts[i].text = fEmo[i] + " " + d.fruits[i];
+            
+            updateIconDisplay();
+        }
+
+        // --- LOGIC ---
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const isDark = document.body.classList.contains('dark');
@@ -215,6 +327,32 @@
 
         function getTodayKey() { return new Date().toISOString().split('T')[0]; }
         function saveDailyProgress() { weeklyRecord[getTodayKey()] = total; localStorage.setItem('weeklyRecord', JSON.stringify(weeklyRecord)); }
+
+        // --- STREAK LOGIC ---
+        function checkStreak() {
+            const today = getTodayKey();
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            const yKey = yesterday.toISOString().split('T')[0];
+
+            if (total >= goal) {
+                if (lastStreakDate === yKey) {
+                    streak++;
+                    lastStreakDate = today;
+                } else if (lastStreakDate !== today) {
+                    streak = 1;
+                    lastStreakDate = today;
+                }
+            }
+            
+            // Check if broken on load
+            if (lastStreakDate !== today && lastStreakDate !== yKey && lastStreakDate !== '') {
+               // streak = 0; // Optional: reset visually if broken, keep data
+            }
+            
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('lastStreakDate', lastStreakDate);
+            document.getElementById('streak-val').innerText = streak;
+        }
 
         function renderChart() {
             const chartContainer = document.getElementById('weekly-chart'); chartContainer.innerHTML = '';
@@ -238,7 +376,7 @@
             const cb = document.getElementById('notif-toggle');
             if (cb.checked) {
                 Notification.requestPermission().then(p => {
-                    if (p === 'granted') { notificationsEnabled = true; localStorage.setItem('notifications', 'true'); new Notification("Włączone! 💧"); } 
+                    if (p === 'granted') { notificationsEnabled = true; localStorage.setItem('notifications', 'true'); new Notification(langData[currentLang].msg_on); } 
                     else { cb.checked = false; alert("Brak zgody."); }
                 });
             } else { notificationsEnabled = false; localStorage.setItem('notifications', 'false'); }
@@ -248,10 +386,10 @@
             if (!notificationsEnabled) return;
             const now = new Date(); const tKey = getTodayKey();
             if (now.getHours() === 9 && now.getMinutes() === 0 && localStorage.getItem('lastMorning') !== tKey) {
-                new Notification("Czas na wodę! ☀️", {body: `Twój cel: ${goal}ml`}); localStorage.setItem('lastMorning', tKey);
+                new Notification(langData[currentLang].msg_am, {body: goal + "ml"}); localStorage.setItem('lastMorning', tKey);
             }
             if (now.getHours() === 21 && now.getMinutes() === 0 && localStorage.getItem('lastEvening') !== tKey && total < goal && total > 0) {
-                new Notification("Prawie meta! 🌙", {body: `Brakuje ${Math.round(goal-total)}ml`}); localStorage.setItem('lastEvening', tKey);
+                new Notification(langData[currentLang].msg_pm, {body: Math.round(goal-total) + "ml"}); localStorage.setItem('lastEvening', tKey);
             }
         }
         setInterval(checkNotifications, 60000);
@@ -266,7 +404,7 @@
 
         function checkCustomAmount(s) {
             if (s.value === 'custom') {
-                let n = prompt("Ilość ml (max 10000):");
+                let n = prompt("Max 10000 ml:");
                 if (n && parseInt(n) > 0) {
                     let v = Math.min(parseInt(n), 10000);
                     let o = new Option(v, v); s.add(o, 0); s.value = v;
@@ -274,7 +412,7 @@
             }
         }
         function setGoal() { 
-            let n = prompt("Cel (max 10000):", goal); 
+            let n = prompt("Cel/Goal (max 10000):", goal); 
             if(n) { goal = Math.min(parseInt(n), 10000); localStorage.setItem('goal', goal); update(); } 
         }
         function checkAutoAdd() {
@@ -298,14 +436,14 @@
             historyLog.unshift({ id: Date.now(), amount: amt, icon: icon, hydration: hydro, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
             saveData(); update();
         }
-        function resetAll() { if(confirm("Reset dnia?")) { total = 0; historyLog = []; saveData(); update(); closeAll(); } }
+        function resetAll() { if(confirm("Reset?")) { total = 0; historyLog = []; saveData(); update(); closeAll(); } }
         function deleteEntry(id) { 
             const idx = historyLog.findIndex(i => i.id === id);
             if(idx > -1) { total -= historyLog[idx].hydration; if(total<0)total=0; historyLog.splice(idx,1); saveData(); update(); renderHistory(); }
         }
         function renderHistory() {
             const l = document.getElementById('history-list'); l.innerHTML = "";
-            if(!historyLog.length) { l.innerHTML = "<div class='text-center text-sub mt-4 opacity-60'>Pusto...</div>"; return; }
+            if(!historyLog.length) { l.innerHTML = "<div class='text-center text-sub mt-4 opacity-60'>...</div>"; return; }
             historyLog.forEach(i => {
                 l.innerHTML += `<div class="flex justify-between items-center bg-white/40 dark:bg-white/5 p-3 rounded-2xl border border-white/40 dark:border-white/10 mb-2">
                     <div class="flex items-center gap-3"><span class="text-2xl">${i.icon}</span><div><div class="font-bold text-current">${i.amount} ml</div><div class="text-xs text-sub">${i.time}</div></div></div>
@@ -313,7 +451,7 @@
                 </div>`;
             });
         }
-        function saveData() { localStorage.setItem('total', total); localStorage.setItem('historyLog', JSON.stringify(historyLog)); saveDailyProgress(); }
+        function saveData() { localStorage.setItem('total', total); localStorage.setItem('historyLog', JSON.stringify(historyLog)); saveDailyProgress(); checkStreak(); }
         function update() {
             document.getElementById('total').innerText = Math.round(total); document.getElementById('display-goal').innerText = goal;
             const p = Math.min(Math.round((total/goal)*100), 100);
@@ -322,9 +460,15 @@
             const today = getTodayKey();
             if(localStorage.getItem('lastDate') && localStorage.getItem('lastDate') !== today) { total=0; historyLog=[]; saveData(); }
             localStorage.setItem('lastDate', today);
+            checkStreak();
         }
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
-        update(); updateIconDisplay();
+        
+        // Init
+        document.getElementById('lang-select').value = currentLang;
+        changeLanguage(currentLang);
+        update(); 
+        updateIconDisplay();
     </script>
     <style> @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } } .animate-blob { animation: blob 7s infinite; } .animation-delay-2000 { animation-delay: 2s; } .animation-delay-4000 { animation-delay: 4s; } </style>
 </body>
