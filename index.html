@@ -5,88 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="HydroTrack">
-    
     <link rel="apple-touch-icon" href="IMG_3634.png">
-    
     <title>HydroTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .man-mask {
             mask-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e5/Human-shadow.svg');
-            mask-size: contain; mask-repeat: no-repeat; mask-position: center;
             -webkit-mask-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e5/Human-shadow.svg');
+            mask-size: contain; mask-repeat: no-repeat; mask-position: center;
             -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
         }
-        select { -webkit-appearance: none; }
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        /* Menu wysuwane iOS */
+        #action-sheet {
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #action-sheet.show { transform: translateY(0); }
+        .sheet-btn {
+            width: 100%; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 500; color: #007AFF; font-size: 18px;
+        }
+        select { -webkit-appearance: none; appearance: none; }
     </style>
 </head>
-<body class="bg-slate-50 flex flex-col items-center h-screen p-6 font-sans overflow-hidden">
+<body class="bg-slate-100 flex flex-col items-center h-screen p-6 font-sans overflow-hidden">
 
-    <div id="clock" class="text-slate-400 font-mono text-sm mb-2">00:00:00</div>
+    <div id="clock" class="text-slate-400 font-mono text-xs mb-4">00:00:00</div>
 
-    <button onclick="setGoal()" class="bg-white shadow-sm border px-6 py-2 rounded-full font-bold text-blue-600">
+    <button onclick="setGoal()" class="liquid-glass px-6 py-2 rounded-full font-bold text-blue-600 text-sm">
         Cel: <span id="display-goal">2500</span> ml
     </button>
 
     <div class="flex-grow flex flex-col justify-center items-center w-full">
-        <div class="relative w-48 h-80">
-            <div class="absolute inset-0 bg-gray-200 man-mask"></div>
-            <div id="water-fill" class="absolute inset-0 bg-blue-500 man-mask transition-all duration-700" style="height: 0%; top: auto;"></div>
+        <div class="relative w-44 h-72">
+            <div class="absolute inset-0 bg-gray-300/50 man-mask"></div>
+            <div id="water-fill" class="absolute inset-0 bg-blue-500 man-mask transition-all duration-1000" style="height: 0%; top: auto;"></div>
         </div>
-        <div class="mt-4 text-center">
-            <div class="text-4xl font-black text-slate-800"><span id="total">0</span></div>
-            <div class="text-slate-400 uppercase tracking-widest text-[10px]">ml nawodnienia</div>
+        <div class="mt-6 text-center">
+            <div class="text-5xl font-black text-slate-800 tracking-tight"><span id="total">0</span></div>
+            <div class="text-slate-400 uppercase tracking-[0.2em] text-[9px] mt-1">ml nawodnienia</div>
         </div>
     </div>
 
-    <div class="flex items-center justify-center gap-8 w-full mb-12">
-        <button onclick="changeAmount()" class="w-16 h-16 bg-white shadow-lg rounded-full border-2 border-blue-50 flex flex-col items-center justify-center active:scale-95 transition">
-            <span id="btn-amount" class="font-bold text-blue-600">250</span>
-            <span class="text-[10px] text-gray-400">ml</span>
+    <div class="flex items-center justify-around w-full max-w-xs mb-10">
+        <button onclick="toggleSheet()" class="liquid-glass w-16 h-16 rounded-full flex flex-col items-center justify-center transition active:scale-90">
+            <span id="btn-amount" class="font-bold text-blue-600 text-lg">250</span>
+            <span class="text-[9px] text-blue-400 font-bold uppercase">ml</span>
         </button>
 
-        <button onclick="addDrink()" class="w-24 h-24 bg-blue-600 shadow-2xl rounded-full flex items-center justify-center text-white text-4xl active:scale-90 transition border-4 border-white">
+        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-blue-600 text-5xl font-light active:scale-90 transition shadow-2xl">
             +
         </button>
 
         <div class="relative w-16 h-16">
-            <select id="beverage" class="w-full h-full bg-white shadow-lg rounded-full border-2 border-blue-50 text-center text-2xl outline-none cursor-pointer">
-                <option value="1.0">💧 Woda</option>
-                <option value="1.2">🥥 W. Koko</option>
-                <option value="0.95">🍵 Herbata</option>
-                <option value="0.8">☕ Kawa</option>
-                <option value="1.1">🥛 Mleko</option>
-                <option value="0.5">⚡ Energy</option>
-                <option value="0.92">🍉 Arbuz</option>
-                <option value="0.91">🍓 Truskawka</option>
-                <option value="0.85">🍊 Mandarynka</option>
-                <option value="0.75">🍌 Banan</option>
+            <select id="beverage" class="liquid-glass w-full h-full rounded-full text-center text-2xl outline-none">
+                <option value="1.0">💧</option><option value="1.2">🥥</option><option value="0.95">🍵</option>
+                <option value="0.8">☕</option><option value="1.1">🥛</option><option value="0.92">🍉</option>
+                <option value="0.85">🍊</option><option value="0.75">🍌</option>
             </select>
         </div>
+    </div>
+
+    <div id="overlay" onclick="toggleSheet()" class="fixed inset-0 bg-black/20 hidden backdrop-blur-sm z-40"></div>
+    <div id="action-sheet" class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl rounded-t-3xl z-50 overflow-hidden px-4 pb-8">
+        <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto my-3"></div>
+        <div class="bg-white rounded-2xl overflow-hidden mb-3">
+            <button class="sheet-btn" onclick="selectAmt(100)">100 ml</button>
+            <button class="sheet-btn" onclick="selectAmt(250)">250 ml</button>
+            <button class="sheet-btn" onclick="selectAmt(330)">330 ml</button>
+            <button class="sheet-btn" onclick="selectAmt(500)">500 ml</button>
+            <button class="sheet-btn" onclick="selectAmt(1000)">1000 ml</button>
+            <button class="sheet-btn text-orange-500" onclick="customAmt()">Custom ✎</button>
+        </div>
+        <button class="w-full bg-white p-4 rounded-2xl font-bold text-blue-600 text-lg" onclick="toggleSheet()">Anuluj</button>
     </div>
 
     <script>
         let total = parseFloat(localStorage.getItem('total')) || 0;
         let goal = parseInt(localStorage.getItem('goal')) || 2500;
-        let lastDate = localStorage.getItem('lastDate') || new Date().toLocaleDateString();
-        const amounts = [100, 200, 250, 330, 500, 1000];
-        let amtIdx = 2;
+        let currentAmt = 250;
 
-        function checkNewDay() {
-            const today = new Date().toLocaleDateString();
-            if (today !== lastDate) {
-                total = 0;
-                lastDate = today;
-                localStorage.setItem('total', 0);
-                localStorage.setItem('lastDate', today);
-                update();
-            }
+        function toggleSheet() {
+            document.getElementById('action-sheet').classList.toggle('show');
+            document.getElementById('overlay').classList.toggle('hidden');
         }
 
-        function updateClock() {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-            checkNewDay();
+        function selectAmt(val) {
+            currentAmt = val;
+            document.getElementById('btn-amount').innerText = val;
+            toggleSheet();
+        }
+
+        function customAmt() {
+            let n = prompt("Ile ml wypiłeś?", currentAmt);
+            if(n) selectAmt(parseInt(n)); else toggleSheet();
         }
 
         function setGoal() {
@@ -94,15 +113,9 @@
             if(n) { goal = parseInt(n); localStorage.setItem('goal', goal); update(); }
         }
 
-        function changeAmount() {
-            amtIdx = (amtIdx + 1) % amounts.length;
-            document.getElementById('btn-amount').innerText = amounts[amtIdx];
-        }
-
         function addDrink() {
-            checkNewDay();
             const f = parseFloat(document.getElementById('beverage').value);
-            total += amounts[amtIdx] * f;
+            total += currentAmt * f;
             localStorage.setItem('total', total);
             update();
         }
@@ -111,10 +124,12 @@
             document.getElementById('total').innerText = Math.round(total);
             document.getElementById('display-goal').innerText = goal;
             const p = Math.min((total / goal) * 100, 100);
-            document.getElementById('water-fill').style.height = p + "%";
+            const fill = document.getElementById('water-fill');
+            fill.style.height = p + "%";
+            fill.style.top = (100 - p) + "%";
         }
 
-        setInterval(updateClock, 1000);
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
         update();
     </script>
 </body>
