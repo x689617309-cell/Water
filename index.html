@@ -9,7 +9,7 @@
     <title>HydroTrack Liquid</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* TŁO MESH GRADIENT (Żeby szkło miało co rozmywać) */
+        /* TŁO MESH GRADIENT */
         body {
             background-color: #f0f4ff;
             background-image: 
@@ -20,55 +20,27 @@
             animation: gradient 15s ease infinite;
             color: #1d1d1f;
         }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         /* PRAWDZIWY LIQUID GLASS (Apple Style) */
         .liquid-glass {
-            /* Półprzezroczystość */
             background: rgba(255, 255, 255, 0.25);
-            /* Rozmycie tła + Podbicie kolorów (Saturate to klucz!) */
             backdrop-filter: blur(40px) saturate(200%);
             -webkit-backdrop-filter: blur(40px) saturate(200%);
-            /* Krawędź */
             border: 1px solid rgba(255, 255, 255, 0.4);
-            /* Cień i wewnętrzny blask */
-            box-shadow: 
-                0 8px 32px 0 rgba(0, 0, 0, 0.1),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
-
-        .liquid-glass:active {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0.96);
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        /* Specjalny styl dla Selecta */
-        select {
-            -webkit-appearance: none; appearance: none;
-            background-color: transparent;
-        }
-
+        .liquid-glass:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.96); transition: all 0.2s; }
+        select { -webkit-appearance: none; appearance: none; background-color: transparent; }
+        
         /* Menu wysuwane */
         .sheet {
-            transform: translateY(110%);
-            transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-            background: rgba(250, 250, 250, 0.85);
-            backdrop-filter: blur(50px) saturate(180%);
-            -webkit-backdrop-filter: blur(50px) saturate(180%);
-            border-top: 1px solid rgba(255,255,255,0.5);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+            background: rgba(250, 250, 250, 0.85); backdrop-filter: blur(50px) saturate(180%); -webkit-backdrop-filter: blur(50px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.5); box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
         .sheet.show { transform: translateY(0); }
-        
-        /* Ukrywanie scrollbara */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="flex flex-col items-center h-screen font-sans overflow-hidden relative selection:bg-blue-200">
@@ -82,9 +54,7 @@
     <div id="clock" class="absolute top-14 left-6 text-slate-600 font-medium text-xs tracking-wide mix-blend-overlay">00:00</div>
 
     <button onclick="toggleHistory()" class="liquid-glass w-14 h-14 rounded-full flex items-center justify-center text-slate-700 absolute right-6 top-24 z-20 shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
     </button>
 
     <button onclick="setGoal()" class="liquid-glass px-6 py-3 rounded-full font-semibold text-slate-700 text-sm mt-24 mb-4 z-10 flex items-center gap-2">
@@ -96,22 +66,18 @@
             <svg viewBox="0 0 100 200" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
                 <defs>
                     <clipPath id="human-clip">
-                        <path d="M50,15 C58,15,65,22,65,30 C65,38,58,45,50,45 C42,45,35,38,35,30 C35,22,42,15,50,15 Z M75,55 H25 C18,55,15,62,15,70 V120 C15,125,18,130,22,130 H26 V190 C26,196,30,200,36,200 H40 C46,200,50,196,50,190 V140 H50 V190 C50,196,54,200,60,200 H64 C70,200,74,196,74,190 V130 H78 C82,130,85,125,85,120 V70 C85,62,82,55,75,55 Z" />
+                        <path d="M50,10 a20,20 0 1,0 0,40 a20,20 0 1,0 0,-40 M30,60 h40 a10,10 0 0,1 10,10 v120 a10,10 0 0,1 -10,10 h-15 v-70 h-10 v70 h-15 a10,10 0 0,1 -10,-10 v-120 a10,10 0 0,1 10,-10 z" />
                     </clipPath>
                 </defs>
                 
-                <path d="M50,15 C58,15,65,22,65,30 C65,38,58,45,50,45 C42,45,35,38,35,30 C35,22,42,15,50,15 Z M75,55 H25 C18,55,15,62,15,70 V120 C15,125,18,130,22,130 H26 V190 C26,196,30,200,36,200 H40 C46,200,50,196,50,190 V140 H50 V190 C50,196,54,200,60,200 H64 C70,200,74,196,74,190 V130 H78 C82,130,85,125,85,120 V70 C85,62,82,55,75,55 Z" 
+                <path d="M50,10 a20,20 0 1,0 0,40 a20,20 0 1,0 0,-40 M30,60 h40 a10,10 0 0,1 10,10 v120 a10,10 0 0,1 -10,10 h-15 v-70 h-10 v70 h-15 a10,10 0 0,1 -10,-10 v-120 a10,10 0 0,1 10,-10 z" 
                       fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
 
                 <g clip-path="url(#human-clip)">
                     <rect id="water-rect" x="0" y="200" width="100" height="200" fill="url(#water-grad)" class="transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
                     </rect>
                 </g>
-                
-                <linearGradient id="water-grad" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#007AFF" />
-                    <stop offset="100%" stop-color="#5AC8FA" />
-                </linearGradient>
+                <linearGradient id="water-grad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#007AFF" /><stop offset="100%" stop-color="#5AC8FA" /></linearGradient>
             </svg>
         </div>
         
@@ -121,24 +87,20 @@
         </div>
     </div>
 
-    <div class="flex items-center justify-between w-full max-w-[320px] mb-12 px-2 z-20 gap-4">
+    <div class="flex items-center justify-between w-full max-w-[320px] mb-12 px-2 z-20 gap-5">
         
-        <button onclick="toggleSheet()" class="liquid-glass w-[72px] h-[72px] rounded-[24px] flex flex-col items-center justify-center transition hover:bg-white/40">
+        <button onclick="toggleSheet()" class="liquid-glass w-[76px] h-[76px] rounded-full flex flex-col items-center justify-center transition hover:bg-white/40">
             <span id="btn-amount" class="font-bold text-[#007AFF] text-lg">250</span>
             <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wide">ML</span>
         </button>
 
-        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-[32px] flex items-center justify-center text-[#007AFF] text-5xl font-light shadow-2xl hover:scale-105 transition duration-300">
+        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-[#007AFF] text-5xl font-light shadow-2xl hover:scale-105 transition duration-300">
             +
         </button>
 
-        <div class="relative w-[72px] h-[72px]">
-            <select id="beverage" class="liquid-glass w-full h-full rounded-[24px] text-center text-2xl outline-none cursor-pointer">
-                <option value="1.0">💧</option>
-                <option value="1.2">🥥</option>
-                <option value="0.92">🍉</option>
-                <option value="0.8">☕</option>
-                <option value="0.75">🍌</option>
+        <div class="relative w-[76px] h-[76px]">
+            <select id="beverage" class="liquid-glass w-full h-full rounded-full text-center text-2xl outline-none cursor-pointer">
+                <option value="1.0">💧</option><option value="1.2">🥥</option><option value="0.92">🍉</option><option value="0.8">☕</option><option value="0.75">🍌</option>
             </select>
         </div>
     </div>
@@ -160,15 +122,11 @@
 
     <div id="history-sheet" class="sheet fixed bottom-0 left-0 right-0 h-[75vh] z-50 px-5 pb-10 pt-4 rounded-t-[36px] flex flex-col">
         <div class="w-10 h-1 bg-black/10 rounded-full mx-auto mb-4 flex-shrink-0"></div>
-        
         <div class="flex justify-between items-center mb-6 px-2">
             <h2 class="font-bold text-2xl text-slate-800">Dzisiaj</h2>
             <span class="text-slate-400 text-sm font-medium" id="history-date">Data</span>
         </div>
-
-        <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-6">
-            </div>
-
+        <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-6"></div>
         <div class="pt-4 mt-2 border-t border-black/5 flex-shrink-0 space-y-3">
             <button onclick="resetAll()" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
@@ -179,7 +137,6 @@
     </div>
 
     <script>
-        // --- LOGIKA ---
         let total = parseFloat(localStorage.getItem('total')) || 0;
         let goal = parseInt(localStorage.getItem('goal')) || 2500;
         let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
@@ -188,15 +145,10 @@
 
         document.getElementById('history-date').innerText = new Date().toLocaleDateString('pl-PL', {weekday: 'long', day: 'numeric', month: 'long'});
 
-        // Ekrany
         function toggleSheet() { document.getElementById('action-sheet').classList.toggle('show'); document.getElementById('overlay').classList.remove('hidden'); }
         function toggleHistory() { renderHistory(); document.getElementById('history-sheet').classList.toggle('show'); document.getElementById('overlay').classList.remove('hidden'); }
-        function closeAll() {
-            document.querySelectorAll('.sheet').forEach(el => el.classList.remove('show'));
-            document.getElementById('overlay').classList.add('hidden');
-        }
+        function closeAll() { document.querySelectorAll('.sheet').forEach(el => el.classList.remove('show')); document.getElementById('overlay').classList.add('hidden'); }
 
-        // Akcje
         function selectAmt(v) { currentAmt = v; document.getElementById('btn-amount').innerText = v; closeAll(); }
         function customAmt() { let n = prompt("Ile ml?", currentAmt); if(n) selectAmt(parseInt(n)); else closeAll(); }
         function setGoal() { let n = prompt("Cel (ml):", goal); if(n) { goal = parseInt(n); localStorage.setItem('goal', goal); update(); } }
@@ -205,86 +157,37 @@
             const bevVal = document.getElementById('beverage').value;
             const realHydration = currentAmt * parseFloat(bevVal);
             total += realHydration;
-            
-            const entry = {
-                id: Date.now(),
-                amount: currentAmt,
-                icon: icons[bevVal] || '🥤',
-                hydration: realHydration,
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            };
-            historyLog.unshift(entry);
-            saveData(); update();
+            const entry = { id: Date.now(), amount: currentAmt, icon: icons[bevVal] || '🥤', hydration: realHydration, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+            historyLog.unshift(entry); saveData(); update();
         }
 
-        function resetAll() {
-            if(confirm("Usunąć całą historię z dziś?")) {
-                total = 0; historyLog = [];
-                saveData(); update(); closeAll();
-            }
-        }
-
-        function deleteEntry(id) {
-            const idx = historyLog.findIndex(i => i.id === id);
-            if(idx > -1) {
-                total -= historyLog[idx].hydration;
-                if(total < 0) total = 0;
-                historyLog.splice(idx, 1);
-                saveData(); update(); renderHistory();
-            }
-        }
+        function resetAll() { if(confirm("Usunąć całą historię z dziś?")) { total = 0; historyLog = []; saveData(); update(); closeAll(); } }
+        function deleteEntry(id) { const idx = historyLog.findIndex(i => i.id === id); if(idx > -1) { total -= historyLog[idx].hydration; if(total < 0) total = 0; historyLog.splice(idx, 1); saveData(); update(); renderHistory(); } }
 
         function renderHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = "";
+            const list = document.getElementById('history-list'); list.innerHTML = "";
             if(historyLog.length === 0) { list.innerHTML = "<div class='text-center text-slate-400 mt-10 opacity-60'>Pusto... Wypij coś! 💧</div>"; return; }
-            
             historyLog.forEach(item => {
                 const el = document.createElement('div');
-                // Liquid glass dla elementów listy
                 el.className = "flex justify-between items-center bg-white/40 backdrop-blur-md p-4 rounded-[20px] border border-white/40 shadow-sm";
-                el.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white/60 rounded-full flex items-center justify-center text-2xl shadow-sm">${item.icon}</div>
-                        <div>
-                            <div class="font-bold text-slate-800 text-lg">${item.amount} ml</div>
-                            <div class="text-xs text-slate-500 font-medium">${item.time}</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm font-bold text-[#007AFF]">+${Math.round(item.hydration)}</span>
-                        <button onclick="deleteEntry(${item.id})" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 transition">✕</button>
-                    </div>`;
+                el.innerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 bg-white/60 rounded-full flex items-center justify-center text-2xl shadow-sm">${item.icon}</div><div><div class="font-bold text-slate-800 text-lg">${item.amount} ml</div><div class="text-xs text-slate-500 font-medium">${item.time}</div></div></div><div class="flex items-center gap-4"><span class="text-sm font-bold text-[#007AFF]">+${Math.round(item.hydration)}</span><button onclick="deleteEntry(${item.id})" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 transition">✕</button></div>`;
                 list.appendChild(el);
             });
         }
 
         function saveData() { localStorage.setItem('total', total); localStorage.setItem('historyLog', JSON.stringify(historyLog)); }
-        
         function update() {
             document.getElementById('total').innerText = Math.round(total);
             document.getElementById('display-goal').innerText = goal;
-            
-            // Animacja wody
             const p = Math.min((total / goal), 1);
-            const waterLevel = 200 - (p * 200); // 200 = wysokość SVG viewbox
+            // 200 = wysokość SVG, wypełnia do 10 (szyja)
+            const waterLevel = 200 - (p * 190); 
             document.getElementById('water-rect').setAttribute('y', waterLevel);
         }
 
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
         update();
     </script>
-    
-    <style>
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 7s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-    </style>
+    <style> @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } } .animate-blob { animation: blob 7s infinite; } .animation-delay-2000 { animation-delay: 2s; } .animation-delay-4000 { animation-delay: 4s; } </style>
 </body>
 </html>
