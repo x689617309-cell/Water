@@ -1,746 +1,134 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Water Tracker">
-    <title>Water Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script> tailwind.config = { darkMode: 'class' } </script>
-    <style>
-        /* --- CORE STYLES --- */
-        body { 
-            transition: background-color 0.5s ease, color 0.5s ease; 
-            background-color: #f0f4ff; 
-            color: #1d1d1f;
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
-            touch-action: manipulation;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        body.dark { background-color: #050505; color: #ffffff; }
-        
-        /* BACKGROUND & BLOB STYLES */
-        .bg-layer { position: fixed; inset: 0; z-index: -10; overflow: hidden; transition: all 0.5s; background-size: cover; background-position: center; }
-        .bg-layer.blurred { filter: blur(20px); transform: scale(1.1); }
-        
-        .blob { filter: blur(60px); mix-blend-mode: multiply; opacity: 0.4; transition: all 0.5s; position: absolute; border-radius: 50%; }
-        body.dark .blob { mix-blend-mode: normal; opacity: 0.25; filter: blur(80px); }
-        .animate-blob { animation: blob 10s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-        @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Water Tracker</title>
 
-        /* --- LIQUID GLASS --- */
-        .liquid-glass {
-            background: rgba(255, 255, 255, 0.3); 
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
-            transform: scale(1);
-        }
-        body.dark .liquid-glass {
-            background: rgba(40, 40, 40, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-        }
-        .liquid-glass:active { transform: scale(0.95) !important; background: rgba(255, 255, 255, 0.5); }
-        body.dark .liquid-glass:active { background: rgba(60, 60, 60, 0.5); }
+<script src="https://cdn.tailwindcss.com"></script>
+<script> tailwind.config = { darkMode: 'class' } </script>
 
-        /* Static Glass (No Click Animation) */
-        .static-glass {
-            background: rgba(255, 255, 255, 0.3); 
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.05);
-        }
-        body.dark .static-glass {
-            background: rgba(40, 40, 40, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+<style>
+body{
+    transition: background-color .4s, color .4s;
+    background:#f0f4ff;
+    color:#1d1d1f;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+body.dark{ background:#050505;color:#fff }
 
-        select { -webkit-appearance: none; appearance: none; background: transparent; text-align: center; text-align-last: center; font-weight: bold; width: 100%; height: 100%; }
-        option { color: black; }
+.bg-layer{
+    position:fixed;
+    inset:0;
+    z-index:-10;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    transition:.4s;
+}
 
-        .glass-tube { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 0 20px rgba(255,255,255,0.2); }
-        body.dark .glass-tube { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); }
+.liquid-glass{
+    background:rgba(255,255,255,.3);
+    backdrop-filter:blur(40px) saturate(180%);
+    border:1px solid rgba(255,255,255,.4);
+}
 
-        /* --- SHEETS & FULLSCREEN --- */
-        .sheet {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(250, 250, 250, 0.95); backdrop-filter: blur(50px) saturate(180%);
-            border-top: 1px solid rgba(255,255,255,0.6); 
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1); color: #1d1d1f;
-            border-radius: 36px 36px 0 0; z-index: 50;
-            transform: translateY(120%); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            touch-action: none;
-        }
-        body.dark .sheet { background: rgba(25, 25, 25, 0.9); border-top: 1px solid rgba(255,255,255,0.15); color: white; box-shadow: 0 -10px 50px rgba(0,0,0,0.5); }
-        .sheet.show { transform: translateY(0); }
+body.dark .liquid-glass{
+    background:rgba(40,40,40,.3);
+    border:1px solid rgba(255,255,255,.1);
+}
 
-        .fullscreen-menu {
-            position: fixed; inset: 0; z-index: 60;
-            background: #f0f4ff; color: #1d1d1f;
-            transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-            overflow-y: auto;
-        }
-        body.dark .fullscreen-menu { background: #050505; color: white; }
-        .fullscreen-menu.show { transform: translateX(0); }
-
-        .sheet-handle-area { width: 100%; height: 40px; display: flex; justify-content: center; align-items: center; cursor: grab; }
-        .sheet-handle { width: 40px; height: 5px; background-color: rgba(0,0,0,0.2); border-radius: 100px; margin-top: 15px; }
-        body.dark .sheet-handle { background-color: rgba(255,255,255,0.2); }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* Custom Switch */
-        .switch-container { position: relative; width: 50px; height: 30px; }
-        .switch-input { opacity: 0; width: 0; height: 0; }
-        .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(120,120,120,0.3); transition: .4s; border-radius: 34px; }
-        .switch-slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .switch-input:checked + .switch-slider { background-color: #34C759; }
-        .switch-input:checked + .switch-slider:before { transform: translateX(20px); }
-
-        .chart-bar-bg { background: rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden; position: relative; }
-        body.dark .chart-bar-bg { background: rgba(255,255,255,0.1); }
-        .chart-fill { background: #007AFF; transition: height 1s ease; border-radius: 6px; position: absolute; bottom: 0; width: 100%; }
-        body.dark .chart-fill { background: #409CFF; }
-        .text-accent { color: #007AFF; } body.dark .text-accent { color: #409CFF; }
-        .text-sub { color: #64748b; } body.dark .text-sub { color: #94a3b8; }
-
-        .history-item-content { touch-action: pan-y; position: relative; z-index: 10; }
-        
-        /* Settings List Styles */
-        .settings-group { overflow: hidden; border-radius: 16px; margin-bottom: 24px; }
-        .settings-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); 
-            height: 60px;
-        }
-        body.dark .settings-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .settings-row:last-child { border-bottom: none; }
-
-        /* iOS Camera Buttons */
-        .ios-circle-btn { 
-            background: rgba(40,40,40,0.6); 
-            width: 50px; height: 50px; 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.1s;
-        }
-        .ios-circle-btn:active { transform: scale(0.95); background: rgba(60,60,60,0.8); }
-
-        .ios-pill-btn {
-            background: rgba(30,30,30,0.65);
-            backdrop-filter: blur(12px);
-            padding: 10px 24px;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: white;
-            font-weight: 600;
-            font-size: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
-        }
-        .ios-pill-btn.active {
-            background: rgba(255, 204, 0, 0.9);
-            color: black;
-            border-color: transparent;
-        }
-    </style>
+.fullscreen-menu{
+    position:fixed;
+    inset:0;
+    z-index:60;
+    background:inherit;
+    transform:translateX(-100%);
+    transition:.4s;
+    overflow:auto;
+}
+.fullscreen-menu.show{ transform:translateX(0) }
+</style>
 </head>
-<body class="flex flex-col items-center h-screen font-sans overflow-hidden relative selection:bg-blue-200" ontouchstart="">
 
-    <div id="user-bg-layer" class="bg-layer hidden"></div>
-    <div id="default-bg-layer" class="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-inherit transition-colors duration-500">
-        <div class="blob absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400 rounded-full animate-blob"></div>
-        <div class="blob absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-400 rounded-full animate-blob animation-delay-2000"></div>
-        <div class="blob absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-indigo-400 rounded-full animate-blob animation-delay-4000"></div>
-    </div>
+<body class="flex flex-col items-center h-screen overflow-hidden relative">
 
-    <div id="clock" class="absolute top-6 left-1/2 -translate-x-1/2 font-medium text-xs tracking-wide opacity-50 mix-blend-difference text-white">00:00</div>
+<div id="user-bg-layer" class="bg-layer hidden"></div>
 
-    <div class="absolute left-6 top-16 z-20 flex flex-col gap-4">
-        <button onclick="openSettings()" class="liquid-glass w-14 h-14 rounded-full flex items-center justify-center text-current shadow-lg cursor-pointer select-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-        </button>
+<button onclick="openSettings()" 
+class="liquid-glass w-14 h-14 rounded-full mt-6 flex items-center justify-center">
+⚙️
+</button>
 
-        <button onclick="toggleStats()" class="liquid-glass w-14 h-14 rounded-full flex items-center justify-center text-current shadow-lg cursor-pointer select-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-            </svg>
-        </button>
-    </div>
+<h1 class="text-4xl mt-10 font-bold">Water Tracker</h1>
 
-    <button onclick="toggleHistory()" class="liquid-glass w-14 h-14 rounded-full flex items-center justify-center text-current absolute right-6 top-16 z-20 shadow-lg cursor-pointer select-none">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-    </button>
+<!-- USTAWIENIA -->
+<div id="settings-screen" class="fullscreen-menu p-6 pt-20">
 
-    <button onclick="openGoalMenu()" class="liquid-glass px-6 py-3 rounded-full font-bold mt-20 mb-4 z-10 flex items-center gap-2 text-current cursor-pointer select-none transition active:scale-105">
-        <span class="opacity-70 text-xs tracking-widest" id="lbl-goal">CEL:</span> 
-        <span class="text-xl" id="display-goal">2500</span> 
-        <span class="text-xs">ml</span>
-    </button>
+<button onclick="closeSettings()" 
+class="mb-8 text-xl">⬅</button>
 
-    <div class="flex-grow flex flex-col justify-center items-center w-full relative z-0 gap-6">
-        <div class="glass-tube relative w-24 h-[35vh] rounded-[40px] overflow-hidden drop-shadow-2xl">
-            <div id="progress-fill" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#007AFF] to-[#5AC8FA] w-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_30px_rgba(0,122,255,0.4)]" style="height: 0%"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent pointer-events-none"></div>
-        </div>
-        <div class="text-center z-10">
-            <div class="text-6xl font-thin tracking-tighter drop-shadow-sm text-current"><span id="total">0</span></div>
-            <div class="text-sub uppercase tracking-[0.2em] text-[10px] font-semibold mt-1" id="lbl-hydro">ml nawodnienia</div>
-            <div class="mt-2 flex flex-col items-center">
-                <div class="text-xl font-bold text-orange-500 mt-1 flex items-center gap-1 transition-all duration-500 opacity-0" id="streak-container">
-                    <span>🔥</span> <span id="streak-val">0</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<h2 class="text-2xl font-bold mb-6">Tapeta</h2>
 
-    <div class="flex items-center justify-between w-full max-w-[320px] mb-12 px-2 z-20 gap-5">
-        <div class="relative w-[76px] h-[76px] select-none">
-            <select id="amount-select" onchange="checkCustomAmount(this)" class="liquid-glass w-full h-full rounded-full text-white text-xl outline-none cursor-pointer font-bold">
-                <option value="100">100</option><option value="250" selected>250</option><option value="330">330</option><option value="500">500</option><option value="1000">1000</option><option value="custom">✎</option>
-            </select>
-            <span class="absolute bottom-3 left-0 right-0 text-center text-[9px] text-sub font-bold uppercase tracking-wide pointer-events-none">ML</span>
-        </div>
+<div class="grid grid-cols-3 gap-4">
 
-        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-white shadow-2xl transition duration-300 cursor-pointer select-none active:scale-95">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-        </button>
+<button onclick="setPresetWallpaper(`url('assets/wallpapers/bg1.jpeg')`)"
+class="aspect-[2/3] rounded-xl bg-cover bg-center"
+style="background-image:url('assets/wallpapers/bg1.jpeg')">
+</button>
 
-        <div class="relative w-[76px] h-[76px] liquid-glass rounded-full flex items-center justify-center select-none">
-            <span id="beverage-icon-display" class="text-3xl pointer-events-none">💧</span>
-            <select id="beverage" onchange="updateIconDisplay(); checkAutoAdd();" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                <optgroup label="Napoje" id="grp-drinks">
-                    <option value="1.0">💧 Water</option><option value="0.9">🧃 Juice</option><option value="0.85">☕ Coffee</option><option value="1.0">☕🥛 Coffee+Milk</option>
-                    <option value="1.15">🥥 Coco Water</option><option value="1.15">🥛 Milk</option><option value="0.9">⚡ Energy</option><option value="0.9">🥤 Soda</option><option value="0.98">🍵 Tea</option><option value="0.6">🍸 Alcohol</option>
-                </optgroup>
-                <optgroup label="Owoce" id="grp-fruits">
-                    <option value="fruit-banana" data-ml="90">🍌 Banana</option><option value="fruit-mandarin" data-ml="65">🍊 Mandarin</option><option value="fruit-kiwi" data-ml="60">🥝 Kiwi</option><option value="fruit-apple" data-ml="150">🍎 Apple</option><option value="fruit-watermelon" data-ml="200">🍉 Watermelon</option><option value="fruit-pineapple" data-ml="140">🍍 Pineapple</option>
-                </optgroup>
-            </select>
-        </div>
-    </div>
+<button onclick="setPresetWallpaper(`url('assets/wallpapers/bg2.jpeg')`)"
+class="aspect-[2/3] rounded-xl bg-cover bg-center"
+style="background-image:url('assets/wallpapers/bg2.jpeg')">
+</button>
 
-    <div id="overlay" onclick="closeAll()" class="fixed inset-0 bg-black/20 hidden backdrop-blur-[2px] z-40 transition-opacity duration-300"></div>
+<button onclick="setPresetWallpaper(`url('assets/wallpapers/bg3.jpeg')`)"
+class="aspect-[2/3] rounded-xl bg-cover bg-center"
+style="background-image:url('assets/wallpapers/bg3.jpeg')">
+</button>
 
-    <div id="camera-modal" class="fixed inset-0 z-[70] bg-black hidden flex-col">
-        <video id="camera-feed" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline></video>
-        <canvas id="camera-canvas" class="hidden"></canvas>
-        <img id="camera-preview" class="absolute inset-0 w-full h-full object-cover hidden">
-        
-        <div id="shutter-container" class="absolute bottom-10 left-0 right-0 flex justify-center pb-8">
-            <button onclick="takePicture()" class="w-20 h-20 bg-white rounded-full border-4 border-gray-300 active:scale-95 transition"></button>
-        </div>
+</div>
 
-        <div id="camera-controls" class="absolute bottom-10 left-0 right-0 flex justify-between items-center px-8 pb-8 hidden">
-            <button onclick="closeCamera()" class="ios-circle-btn text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            
-            <button onclick="toggleCaptureBlur()" id="btn-capture-blur" class="ios-pill-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z" clip-rule="evenodd" /></svg>
-                <span id="lbl-camera-blur">Blur</span>
-            </button>
-            
-            <button onclick="confirmPhoto()" class="ios-circle-btn bg-[#FFCC00] text-black border-none font-bold">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-            </button>
-        </div>
-    </div>
+<div class="mt-10">
+<button onclick="clearBg()" class="text-red-500 font-bold">
+Resetuj tapetę
+</button>
+</div>
 
-    <div id="settings-screen" class="fullscreen-menu bg-inherit">
-        <div class="pt-20 px-6 pb-6">
-            <button onclick="closeAll()" class="absolute top-12 left-6 w-10 h-10 rounded-full liquid-glass flex items-center justify-center text-current shadow-lg z-50 transition active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-            </button>
-            
-            <h1 class="text-4xl font-bold mb-8 pl-8" id="lbl-settings-title">Ustawienia</h1>
-            
-            <h3 class="text-sub font-bold uppercase text-xs mb-2 px-4" id="lbl-appear">Wygląd</h3>
-            
-            <div class="bg-[#2C2C2E] dark:bg-black/40 rounded-[20px] overflow-hidden mb-6 p-4 text-white shadow-lg">
-                <h4 class="font-bold mb-4" id="lbl-wall-title">Home Wallpaper</h4>
-                <button onclick="openCamera()" class="text-orange-400 text-lg mb-6 w-full text-left active:opacity-60 transition font-medium" id="btn-take-photo">Take Photo...</button>
-                
-                <h5 class="text-sub font-bold text-xs uppercase mb-3" id="lbl-choose-exist">Choose from Existing</h5>
-                <div class="grid grid-cols-3 gap-3">
-                    <button onclick="setPresetWallpaper('url(https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=600&auto=format&fit=crop)')" class="aspect-[2/3] rounded-xl bg-cover bg-center active:scale-95 transition" style="background-image: url('https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=600&auto=format&fit=crop');"></button>
-                    <button onclick="setPresetWallpaper('url(https://images.unsplash.com/photo-1490750967868-58cb75069ed6?q=80&w=600&auto=format&fit=crop)')" class="aspect-[2/3] rounded-xl bg-cover bg-center active:scale-95 transition" style="background-image: url('https://images.unsplash.com/photo-1490750967868-58cb75069ed6?q=80&w=600&auto=format&fit=crop');"></button>
-                    <button onclick="setPresetWallpaper('url(https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop)')" class="aspect-[2/3] rounded-xl bg-cover bg-center active:scale-95 transition" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop');"></button>
-                </div>
-            </div>
+</div>
 
-            <div class="settings-group static-glass">
-                <div class="settings-row">
-                    <span class="font-medium" id="lbl-theme">Tryb ciemny</span>
-                    <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-current">
-                        <svg id="theme-icon-set" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"></svg>
-                    </button>
-                </div>
-                <div class="settings-row">
-                    <span class="font-medium" id="lbl-reset-wall">Reset Tapety</span>
-                    <button onclick="clearBg()" class="bg-red-500/20 text-red-500 text-xs font-bold px-3 py-1.5 rounded-full">RESET</button>
-                </div>
-            </div>
+<script>
+function openSettings(){
+    document.getElementById('settings-screen').classList.add('show');
+}
 
-            <h3 class="text-sub font-bold uppercase text-xs mb-2 px-4" id="lbl-pref">Preferencje</h3>
-            <div class="settings-group static-glass">
-                <div class="settings-row">
-                    <span class="font-medium" id="lbl-notif">Powiadomienia</span>
-                    <label class="switch-container">
-                        <input type="checkbox" id="notif-toggle" class="switch-input" onchange="toggleNotifications()">
-                        <span class="switch-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-row">
-                    <span class="font-medium" id="lbl-lang">Język</span>
-                    <div class="relative w-24 h-full">
-                        <select id="lang-select" onchange="changeLanguage(this.value)" class="absolute inset-0 w-full h-full bg-transparent font-bold text-accent outline-none text-right">
-                            <option value="pl">🇵🇱 PL</option><option value="en">🇬🇧 EN</option><option value="es">🇪🇸 ES</option><option value="ru">🇷🇺 RU</option><option value="cn">🇨🇳 CN</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+function closeSettings(){
+    document.getElementById('settings-screen').classList.remove('show');
+}
 
-            <h3 class="text-sub font-bold uppercase text-xs mb-2 px-4" id="lbl-info">Info</h3>
-            <div class="settings-group static-glass p-4">
-                <h4 class="font-bold text-sm mb-2" id="lbl-how-title">Jak używać</h4>
-                <p class="text-xs opacity-70 leading-relaxed mb-4" id="lbl-how-text">...</p>
-                <div class="w-full h-[1px] bg-current opacity-10 mb-4"></div>
-                <h4 class="font-bold text-sm mb-2" id="lbl-tos-title">Regulamin</h4>
-                <div class="text-[10px] opacity-70 leading-relaxed space-y-2 h-40 overflow-y-auto pr-2" id="lbl-tos-text">
-                    </div>
-            </div>
+function setPresetWallpaper(cssUrl){
+    localStorage.setItem('customBg', cssUrl);
+    applyBg();
+    closeSettings();
+}
 
-            <div class="h-10"></div>
-        </div>
-    </div>
+function applyBg(){
+    const bg = localStorage.getItem('customBg');
+    const layer = document.getElementById('user-bg-layer');
 
-    <div id="history-sheet" class="sheet h-[70vh] flex flex-col">
-        <div class="sheet-handle-area" ontouchstart="dragStart(event, 'history-sheet')" ontouchmove="dragMove(event)" ontouchend="dragEnd(event)"><div class="sheet-handle"></div></div>
-        <div class="flex justify-between items-center mb-4 px-6">
-            <h2 class="font-bold text-2xl" id="lbl-today">Dzisiaj</h2>
-            <span class="text-sub text-sm font-medium capitalize" id="history-date">Data</span>
-        </div>
-        <div id="history-list" class="flex-grow overflow-y-auto no-scrollbar space-y-3 pb-2 px-1"></div>
-        <div class="p-6 border-t border-black/5 dark:border-white/10 flex-shrink-0">
-            <button onclick="resetAll()" id="btn-reset" class="w-full bg-[#FF3B30]/10 text-[#FF3B30] py-4 rounded-[20px] font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                <span id="lbl-reset">Zresetuj dzień</span>
-            </button>
-        </div>
-    </div>
+    if(bg){
+        layer.style.backgroundImage = bg;
+        layer.classList.remove('hidden');
+    }
+}
 
-    <div id="stats-sheet" class="sheet h-[50vh] flex flex-col">
-        <div class="sheet-handle-area" ontouchstart="dragStart(event, 'stats-sheet')" ontouchmove="dragMove(event)" ontouchend="dragEnd(event)"><div class="sheet-handle"></div></div>
-        <h2 class="font-bold text-2xl mb-6 px-6" id="lbl-stats">Statystyki</h2>
-        <div class="px-6 flex-grow overflow-y-auto no-scrollbar">
-            <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-[20px] p-5 mb-4 border border-white/40 dark:border-white/10 shadow-sm flex-shrink-0">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="text-xs text-sub font-bold uppercase" id="lbl-week">Ostatnie 7 dni</div>
-                    <div class="text-xs font-bold text-accent"><span id="lbl-avg">Średnia</span>: <span id="weekly-avg">0</span> ml</div>
-                </div>
-                <div class="flex justify-between items-end h-24 gap-2" id="weekly-chart"></div>
-                <div class="mt-3 text-[10px] text-center text-sub"><span id="lbl-best">Najlepszy</span>: <span id="best-day-val" class="text-accent font-bold">0</span> ml</div>
-            </div>
-        </div>
-    </div>
+function clearBg(){
+    localStorage.removeItem('customBg');
+    document.getElementById('user-bg-layer').classList.add('hidden');
+}
 
-    <div id="goal-sheet" class="sheet h-auto pb-10 flex flex-col bg-[#F2F2F7] dark:bg-[#1C1C1E]">
-        <div class="sheet-handle-area" ontouchstart="dragStart(event, 'goal-sheet')" ontouchmove="dragMove(event)" ontouchend="dragEnd(event)"><div class="sheet-handle"></div></div>
-        <div class="px-6 pt-2">
-            <h2 class="font-bold text-2xl mb-6 text-center" id="lbl-set-goal">Ustaw Cel</h2>
-            <div class="flex justify-center mb-6">
-                <input type="number" id="goal-input" class="w-full text-center text-4xl font-bold bg-white dark:bg-black/20 p-4 rounded-2xl outline-none text-accent" value="2500">
-            </div>
-            <div class="flex justify-center gap-3 mb-8">
-                <button onclick="document.getElementById('goal-input').value=2000" class="bg-white dark:bg-white/10 py-2 px-4 rounded-full text-sm font-bold shadow-sm">2000</button>
-                <button onclick="document.getElementById('goal-input').value=2500" class="bg-white dark:bg-white/10 py-2 px-4 rounded-full text-sm font-bold shadow-sm">2500</button>
-                <button onclick="document.getElementById('goal-input').value=3000" class="bg-white dark:bg-white/10 py-2 px-4 rounded-full text-sm font-bold shadow-sm">3000</button>
-            </div>
-            <button onclick="saveGoal()" class="w-full bg-blue-500 text-white py-4 rounded-[20px] font-bold text-lg active:scale-98 transition shadow-md" id="btn-save">Zapisz</button>
-        </div>
-    </div>
+applyBg();
+</script>
 
-    <script>
-        function triggerHaptic() { if (navigator.vibrate) navigator.vibrate(15); }
-
-        let sheetStartY = 0; let currentSheet = null;
-        function dragStart(e, sheetId) { sheetStartY = e.touches[0].clientY; currentSheet = document.getElementById(sheetId); }
-        function dragMove(e) { if (!currentSheet) return; const diff = e.touches[0].clientY - sheetStartY; if (diff > 0) currentSheet.style.transform = `translateY(${diff}px)`; }
-        function dragEnd(e) { if (!currentSheet) return; const diff = e.changedTouches[0].clientY - sheetStartY; if (diff > 100) closeAll(); else currentSheet.style.transform = ''; currentSheet = null; }
-
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error)); }
-
-        let total = parseFloat(localStorage.getItem('total')); if (isNaN(total)) total = 0;
-        let goal = parseInt(localStorage.getItem('goal')) || 2500;
-        let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
-        let weeklyRecord = JSON.parse(localStorage.getItem('weeklyRecord')) || {};
-        let notificationsEnabled = localStorage.getItem('notifications') === 'true';
-        let currentLang = localStorage.getItem('lang') || 'pl';
-        let streak = parseInt(localStorage.getItem('streak')) || 0;
-        
-        const locMap = { pl: 'pl-PL', en: 'en-US', es: 'es-ES', ru: 'ru-RU', cn: 'zh-CN' };
-        const langData = {
-            pl: {
-                goal: "CEL:", hydro: "ml nawodnienia", today: "Dzisiaj", stats: "Statystyki", week: "Ostatnie 7 dni", avg: "Średnia", best: "Najlepszy", notif: "Powiadomienia", lang: "Język", reset: "Zresetuj dzień", msg_am: "Czas na wodę! ☀️", msg_pm: "Prawie meta! 🌙", msg_on: "Włączone! 💧", drinks: ["Woda", "Sok", "Kawa", "Kawa+Mleko", "Woda Koko", "Mleko", "Energetyk", "Cola", "Herbata", "Alkohol"], fruits: ["Banan", "Mandarynka", "Kiwi", "Jabłko", "Arbuz", "Ananas"], label_drinks: "Napoje", label_fruits: "Owoce", set_goal: "Ustaw Cel", save: "Zapisz", 
-                pref: "Preferencje", appear: "Wygląd", theme: "Tryb ciemny", info: "Info", how_title: "Jak używać", how_text: "• Dotknij +, aby dodać napój.<br>• Przesuń w lewo na wpisie w historii, aby go usunąć.<br>• Pociągnij menu w dół, aby je zamknąć.<br>• Kliknij Cel, aby go zmienić.", tos_title: "Regulamin", 
-                tos_text: "<p class='font-bold'>1. Postanowienia ogólne</p>Aplikacja HydroTrack służy wyłącznie do celów informacyjnych i monitorowania nawyków nawodnienia. Nie stanowi porady medycznej.<br><br><p class='font-bold'>2. Dane Użytkownika</p>Wszystkie dane (historia picia, ustawienia) są przechowywane LOKALNIE na Twoim urządzeniu. Twórca nie ma do nich dostępu.<br><br><p class='font-bold'>3. Wyłączenie Odpowiedzialności</p>Używasz aplikacji na własną odpowiedzialność. Zawsze konsultuj się z lekarzem w kwestiach zdrowotnych.", 
-                settings_title: "Ustawienia", wall_title: "Tapeta ekranu", take_photo: "Zrób zdjęcie...", choose_exist: "Wybierz z gotowych", reset_wall: "Resetuj tapetę", blur_btn: "Blur"
-            },
-            en: {
-                goal: "GOAL:", hydro: "ml hydration", today: "Today", stats: "Statistics", week: "Last 7 days", avg: "Average", best: "Best", notif: "Notifications", lang: "Language", reset: "Reset Day", msg_am: "Time for water! ☀️", msg_pm: "Almost there! 🌙", msg_on: "Enabled! 💧", drinks: ["Water", "Juice", "Coffee", "Coffee+Milk", "Coco Water", "Milk", "Energy", "Soda", "Tea", "Alcohol"], fruits: ["Banana", "Mandarin", "Kiwi", "Apple", "Watermelon", "Pineapple"], label_drinks: "Drinks", label_fruits: "Fruits", set_goal: "Set Goal", save: "Save",
-                pref: "Preferences", appear: "Appearance", theme: "Dark Mode", info: "Info", how_title: "How to use", how_text: "• Tap + to add a drink.<br>• Swipe left on history to delete.<br>• Drag menus down to close.<br>• Tap Goal to change.", tos_title: "Terms", 
-                tos_text: "<p class='font-bold'>1. General Provisions</p>HydroTrack is for informational purposes only and for monitoring hydration habits. It does not constitute medical advice.<br><br><p class='font-bold'>2. User Data</p>All data (hydration history, settings) is stored LOCALLY on your device. The creator has no access to it.<br><br><p class='font-bold'>3. Disclaimer</p>Use at your own risk. Always consult a doctor regarding health issues.", 
-                settings_title: "Settings", wall_title: "Home Wallpaper", take_photo: "Take Photo...", choose_exist: "Choose from Existing", reset_wall: "Reset Wallpaper", blur_btn: "Blur"
-            },
-            es: {
-                goal: "META:", hydro: "ml hidratación", today: "Hoy", stats: "Estadísticas", week: "Últimos 7 días", avg: "Media", best: "Mejor", notif: "Notificaciones", lang: "Idioma", reset: "Reiniciar día", msg_am: "¡Hora del agua! ☀️", msg_pm: "¡Casi listo! 🌙", msg_on: "¡Activado! 💧", drinks: ["Agua", "Jugo", "Café", "Café+Leche", "Agua Coco", "Leche", "Energía", "Refresco", "Té", "Alcohol"], fruits: ["Plátano", "Mandarina", "Kiwi", "Manzana", "Sandía", "Piña"], label_drinks: "Bebidas", label_fruits: "Frutas", set_goal: "Fijar Meta", save: "Guardar",
-                pref: "Preferencias", appear: "Apariencia", theme: "Modo Oscuro", info: "Info", how_title: "Cómo usar", how_text: "• Toca + para añadir.<br>• Desliza a la izquierda para borrar.<br>• Arrastra menús abajo para cerrar.<br>• Toca Meta para cambiar.", tos_title: "Términos", 
-                tos_text: "<p class='font-bold'>1. Provisiones Generales</p>HydroTrack es solo para fines informativos. No constituye consejo médico.<br><br><p class='font-bold'>2. Datos del Usuario</p>Todos los datos se almacenan LOCALMENTE en su dispositivo.<br><br><p class='font-bold'>3. Descargo</p>El uso es bajo su propio riesgo. Consulte siempre a un médico.", 
-                settings_title: "Ajustes", wall_title: "Fondo de Pantalla", take_photo: "Tomar Foto...", choose_exist: "Elegir existente", reset_wall: "Restablecer Fondo", blur_btn: "Difuminar"
-            },
-            ru: {
-                goal: "ЦЕЛЬ:", hydro: "мл гидратации", today: "Сегодня", stats: "Статистика", week: "Последние 7 дней", avg: "Среднее", best: "Лучший", notif: "Уведомления", lang: "Язык", reset: "Сбросить день", msg_am: "Время воды! ☀️", msg_pm: "Почти у цели! 🌙", msg_on: "Включено! 💧", drinks: ["Вода", "Сок", "Кофе", "Кофе+Молоко", "Кокос. вода", "Молоко", "Энергетик", "Газировка", "Чай", "Алкоголь"], fruits: ["Банан", "Мандарин", "Киви", "Яблоко", "Арбуз", "Ананас"], label_drinks: "Напитки", label_fruits: "Фрукты", set_goal: "Установить цель", save: "Сохранить",
-                pref: "Настройки", appear: "Внешний вид", theme: "Тёмный режим", info: "Инфо", how_title: "Как использовать", how_text: "• Нажми +, чтобы добавить.<br>• Смахни влево для удаления.<br>• Тяни меню вниз, чтобы закрыть.<br>• Нажми Цель для изменения.", tos_title: "Условия", 
-                tos_text: "<p class='font-bold'>1. Общие положения</p>HydroTrack предназначен только для информационных целей. Не является медицинской консультацией.<br><br><p class='font-bold'>2. Данные</p>Все данные хранятся ЛОКАЛЬНО на вашем устройстве.<br><br><p class='font-bold'>3. Отказ</p>Используйте на свой страх и риск. Всегда консультируйтесь с врачом.", 
-                settings_title: "Настройки", wall_title: "Обои Экрана", take_photo: "Сделать Фото...", choose_exist: "Выбрать из готовых", reset_wall: "Сброс Обоев", blur_btn: "Размыть"
-            },
-            cn: {
-                goal: "目标:", hydro: "毫升 水分", today: "今天", stats: "统计", week: "最近7天", avg: "平均", best: "最佳", notif: "通知", lang: "语言", reset: "重置", msg_am: "该喝水了! ☀️", msg_pm: "快到了! 🌙", msg_on: "已启用! 💧", drinks: ["水", "果汁", "咖啡", "咖啡+牛奶", "椰子水", "牛奶", "能量饮料", "汽水", "茶", "酒精"], fruits: ["香蕉", "橘子", "猕猴桃", "苹果", "西瓜", "菠萝"], label_drinks: "饮料", label_fruits: "水果", set_goal: "设定目标", save: "保存",
-                pref: "偏好", appear: "外观", theme: "深色模式", info: "信息", how_title: "如何使用", how_text: "• 点击 + 添加饮料。<br>• 左滑删除记录。<br>• 下拉关闭菜单。<br>• 点击目标更改。", tos_title: "条款", 
-                tos_text: "<p class='font-bold'>1. 一般规定</p>HydroTrack 仅供参考，不构成医疗建议。<br><br><p class='font-bold'>2. 用户数据</p>所有数据均存储在您的设备本地。<br><br><p class='font-bold'>3. 免责声明</p>使用风险自负。如有健康问题，请咨询医生。", 
-                settings_title: "设置", wall_title: "主屏幕壁纸", take_photo: "拍照...", choose_exist: "选择现有", reset_wall: "重置壁纸", blur_btn: "模糊"
-            }
-        };
-
-        function changeLanguage(lang) {
-            currentLang = lang; localStorage.setItem('lang', lang); const d = langData[lang];
-            const ids = {
-                'lbl-goal': d.goal, 'lbl-hydro': d.hydro, 'lbl-today': d.today, 'lbl-stats': d.stats,
-                'lbl-week': d.week, 'lbl-avg': d.avg, 'lbl-best': d.best, 'lbl-notif': d.notif,
-                'lbl-lang': d.lang, 'lbl-reset': d.reset, 'lbl-set-goal': d.set_goal, 'btn-save': d.save,
-                'lbl-pref': d.pref, 'lbl-appear': d.appear, 'lbl-theme': d.theme, 'lbl-info': d.info,
-                'lbl-how-title': d.how_title, 'lbl-tos-title': d.tos_title, 'lbl-settings-title': d.settings_title,
-                'lbl-wall-title': d.wall_title, 'btn-take-photo': d.take_photo, 'lbl-choose-exist': d.choose_exist, 'lbl-reset-wall': d.reset_wall, 'lbl-camera-blur': d.blur_btn
-            };
-            for(let k in ids) { let el = document.getElementById(k); if(el) el.innerText = ids[k]; }
-            document.getElementById('lbl-how-text').innerHTML = d.how_text;
-            document.getElementById('lbl-tos-text').innerHTML = d.tos_text; 
-            document.getElementById('history-date').innerText = new Date().toLocaleDateString(locMap[lang], {weekday: 'long', day: 'numeric', month: 'long'});
-            document.getElementById('grp-drinks').label = d.label_drinks; document.getElementById('grp-fruits').label = d.label_fruits;
-            const drinkOpts = document.getElementById('grp-drinks').getElementsByTagName('option');
-            const fruitOpts = document.getElementById('grp-fruits').getElementsByTagName('option');
-            const dEmo = ["💧", "🧃", "☕", "☕🥛", "🥥", "🥛", "⚡", "🥤", "🍵", "🍸"];
-            const fEmo = ["🍌", "🍊", "🥝", "🍎", "🍉", "🍍"];
-            for(let i=0; i<drinkOpts.length; i++) drinkOpts[i].text = dEmo[i] + " " + d.drinks[i];
-            for(let i=0; i<fruitOpts.length; i++) fruitOpts[i].text = fEmo[i] + " " + d.fruits[i];
-            updateIconDisplay();
-        }
-
-        /* --- THEME & BACKGROUND LOGIC --- */
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
-            const isDark = document.body.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeIcon(isDark);
-        }
-        function updateThemeIcon(isDark) {
-            document.getElementById('theme-icon-set').innerHTML = isDark 
-                ? '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />'
-                : '<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />';
-        }
-        if(localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); updateThemeIcon(true); } else { document.body.classList.remove('dark'); updateThemeIcon(false); }
-
-        /* --- NEW WALLPAPER & CAMERA LOGIC --- */
-        const userBgLayer = document.getElementById('user-bg-layer');
-        const defaultBgLayer = document.getElementById('default-bg-layer');
-        const cameraModal = document.getElementById('camera-modal');
-        const videoElement = document.getElementById('camera-feed');
-        const canvasElement = document.getElementById('camera-canvas');
-        const previewElement = document.getElementById('camera-preview');
-        const shutterBtn = document.getElementById('shutter-container');
-        const cameraControls = document.getElementById('camera-controls');
-        let stream = null;
-        let capturedImageURI = null;
-        let isBlurred = false;
-        
-        function applyBg() {
-            if(localStorage.getItem('customBg')) {
-                userBgLayer.style.backgroundImage = localStorage.getItem('customBg');
-                userBgLayer.classList.remove('hidden');
-                defaultBgLayer.classList.add('hidden');
-            } else {
-                userBgLayer.classList.add('hidden');
-                defaultBgLayer.classList.remove('hidden');
-            }
-        }
-
-        function setPresetWallpaper(gradient) {
-            localStorage.setItem('customBg', gradient);
-            applyBg();
-            closeAll();
-        }
-
-        function clearBg() { localStorage.removeItem('customBg'); applyBg(); }
-
-        async function openCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-                videoElement.srcObject = stream;
-                cameraModal.classList.remove('hidden');
-                cameraModal.classList.add('flex');
-                previewElement.classList.add('hidden');
-                videoElement.classList.remove('hidden');
-                shutterBtn.classList.remove('hidden');
-                cameraControls.classList.add('hidden');
-                isBlurred = false;
-                previewElement.style.filter = '';
-                document.getElementById('btn-capture-blur').classList.remove('active');
-            } catch (err) {
-                alert("Błąd dostępu do kamery. Upewnij się, że używasz HTTPS lub Localhost.");
-                console.error("Camera error:", err);
-            }
-        }
-
-        function takePicture() {
-            canvasElement.width = videoElement.videoWidth;
-            canvasElement.height = videoElement.videoHeight;
-            const ctx = canvasElement.getContext('2d');
-            ctx.drawImage(videoElement, 0, 0);
-            capturedImageURI = canvasElement.toDataURL('image/jpeg');
-            previewElement.src = capturedImageURI;
-            previewElement.classList.remove('hidden');
-            videoElement.classList.add('hidden');
-            shutterBtn.classList.add('hidden');
-            cameraControls.classList.remove('hidden');
-            cameraControls.classList.add('flex');
-        }
-
-        function toggleCaptureBlur() {
-            isBlurred = !isBlurred;
-            previewElement.style.filter = isBlurred ? 'blur(10px)' : '';
-            const btn = document.getElementById('btn-capture-blur');
-            if(isBlurred) btn.classList.add('active');
-            else btn.classList.remove('active');
-        }
-
-        function confirmPhoto() {
-            if (isBlurred) {
-                const ctx = canvasElement.getContext('2d');
-                ctx.clearRect(0,0, canvasElement.width, canvasElement.height);
-                ctx.filter = 'blur(20px)'; 
-                const img = new Image();
-                img.onload = function() {
-                    ctx.drawImage(img, 0, 0);
-                    saveFinalImage(canvasElement.toDataURL('image/jpeg'));
-                };
-                img.src = capturedImageURI;
-            } else {
-                saveFinalImage(capturedImageURI);
-            }
-        }
-
-        function saveFinalImage(dataUrl) {
-            try {
-                localStorage.setItem('customBg', `url(${dataUrl})`);
-                applyBg();
-                closeCamera();
-                closeAll();
-            } catch(err) {
-                 alert("Zdjęcie jest zbyt duże dla pamięci przeglądarki. Spróbuj mniejsze.");
-            }
-        }
-
-        function closeCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            cameraModal.classList.add('hidden');
-            cameraModal.classList.remove('flex');
-        }
-        applyBg();
-
-        /* --- MENUS --- */
-        function toggleHistory() { closeAll(); renderHistory(); document.getElementById('history-sheet').classList.add('show'); document.getElementById('overlay').classList.remove('hidden'); }
-        function toggleStats() { closeAll(); saveDailyProgress(); renderChart(); document.getElementById('stats-sheet').classList.add('show'); document.getElementById('overlay').classList.remove('hidden'); }
-        function openGoalMenu() { closeAll(); document.getElementById('goal-input').value = goal; document.getElementById('goal-sheet').classList.add('show'); document.getElementById('overlay').classList.remove('hidden'); }
-        function openSettings() { closeAll(); document.getElementById('settings-screen').classList.add('show'); }
-        function closeAll() { 
-            document.querySelectorAll('.sheet').forEach(s => { s.style.transform = ''; s.classList.remove('show'); });
-            document.getElementById('settings-screen').classList.remove('show');
-            document.getElementById('overlay').classList.add('hidden'); 
-        }
-
-        function saveGoal() {
-            let val = parseInt(document.getElementById('goal-input').value);
-            if(val > 0 && val <= 10000) { goal = val; localStorage.setItem('goal', goal); update(); closeAll(); } 
-            else alert("1 - 10000");
-        }
-
-        function getTodayKey() { return new Date().toISOString().split('T')[0]; }
-        function saveDailyProgress() { weeklyRecord[getTodayKey()] = total; localStorage.setItem('weeklyRecord', JSON.stringify(weeklyRecord)); }
-        
-        /* --- STREAK LOGIC --- */
-        function checkMidnightReset() {
-            const today = getTodayKey(); 
-            const lastDate = localStorage.getItem('lastDate');
-            
-            if (lastDate && lastDate !== today) { 
-                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-                const yKey = yesterday.toISOString().split('T')[0];
-                const yVal = weeklyRecord[yKey] || 0;
-                const prevGoal = parseInt(localStorage.getItem('goal')) || 2500;
-
-                if (yVal >= prevGoal) {
-                    streak++; 
-                } else {
-                    streak = 0; 
-                }
-                localStorage.setItem('streak', streak);
-
-                saveDailyProgress(); 
-                total = 0; 
-                historyLog = []; 
-                saveData(); 
-                update(); 
-            }
-            localStorage.setItem('lastDate', today);
-            
-            const sContainer = document.getElementById('streak-container');
-            if(streak > 0) {
-                document.getElementById('streak-val').innerText = streak;
-                sContainer.classList.remove('opacity-0');
-            } else {
-                sContainer.classList.add('opacity-0');
-            }
-        }
-
-        function renderChart() {
-            const chartContainer = document.getElementById('weekly-chart'); chartContainer.innerHTML = '';
-            const days = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
-            let sum = 0, count = 0, max = 0;
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const key = d.toISOString().split('T')[0]; const val = weeklyRecord[key] || 0;
-                if(val > 0) { sum += val; count++; } if(val > max) max = val;
-                let h = Math.round((val / (goal * 1.2)) * 100); if(h > 100) h = 100;
-                chartContainer.innerHTML += `<div class="flex flex-col items-center gap-1 w-full h-full justify-end group"><span class="text-[8px] opacity-0 group-hover:opacity-100 transition absolute -mt-4 bg-black text-white px-1 rounded">${Math.round(val)}</span><div class="chart-bar-bg w-full h-full relative"><div class="chart-fill" style="height: ${h}%"></div></div><span class="text-[9px] font-bold opacity-60">${days[d.getDay()]}</span></div>`;
-            }
-            document.getElementById('weekly-avg').innerText = count > 0 ? Math.round(sum / 7) : 0;
-            document.getElementById('best-day-val').innerText = Math.round(max);
-        }
-
-        document.getElementById('notif-toggle').checked = notificationsEnabled;
-        function toggleNotifications() {
-            const cb = document.getElementById('notif-toggle');
-            if (cb.checked) {
-                Notification.requestPermission().then(p => {
-                    if (p === 'granted') { notificationsEnabled = true; localStorage.setItem('notifications', 'true'); new Notification(langData[currentLang].msg_on); } 
-                    else { cb.checked = false; alert("Brak zgody."); }
-                });
-            } else { notificationsEnabled = false; localStorage.setItem('notifications', 'false'); }
-        }
-        function checkNotifications() {
-            if (!notificationsEnabled) return; const now = new Date(); const tKey = getTodayKey(); const hour = now.getHours();
-            if (hour === 9 && localStorage.getItem('lastMorning') !== tKey) { new Notification(langData[currentLang].msg_am, {body: goal + "ml"}); localStorage.setItem('lastMorning', tKey); }
-            if (hour === 21 && localStorage.getItem('lastEvening') !== tKey && total < goal && total > 0) { new Notification(langData[currentLang].msg_pm, {body: Math.round(goal-total) + "ml"}); localStorage.setItem('lastEvening', tKey); }
-        }
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); checkNotifications(); checkMidnightReset(); }, 1000);
-
-        function updateIconDisplay() {
-            const s = document.getElementById('beverage');
-            const txt = s.options[s.selectedIndex].text;
-            document.getElementById('beverage-icon-display').innerText = Array.from(txt)[0] + (txt.startsWith('☕🥛') ? '🥛' : '');
-        }
-        function checkCustomAmount(s) {
-            if (s.value === 'custom') {
-                let n = prompt("Max 10000 ml:");
-                if (n && parseInt(n) > 0) { let v = Math.min(parseInt(n), 10000); let o = new Option(v, v); s.add(o, 0); s.value = v; } else s.value = "250";
-            }
-        }
-        function checkAutoAdd() {
-            const s = document.getElementById('beverage');
-            if (s.value.startsWith('fruit-')) { executeAdd(parseFloat(s.options[s.selectedIndex].getAttribute('data-ml')), true, s); setTimeout(() => { s.value = "1.0"; updateIconDisplay(); }, 500); }
-        }
-        function addDrink() {
-            const s = document.getElementById('beverage');
-            if (s.value.startsWith('fruit-')) executeAdd(parseFloat(s.options[s.selectedIndex].getAttribute('data-ml')), true, s);
-            else executeAdd(parseFloat(s.value), false, s);
-        }
-        function executeAdd(factor, isFruit, sEl) {
-            triggerHaptic();
-            let amt = isFruit ? factor : parseInt(document.getElementById('amount-select').value);
-            if (isNaN(amt) || amt <= 0) amt = 250;
-            const hydro = isFruit ? amt : amt * factor;
-            if (isNaN(hydro)) return;
-
-            total += hydro;
-            const txt = sEl.options[sEl.selectedIndex].text;
-            const icon = Array.from(txt)[0] + (txt.startsWith('☕🥛') ? '🥛' : '');
-            historyLog.unshift({ id: Date.now(), amount: amt, icon: icon, hydration: hydro, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-            saveData(); update(); renderHistory();
-        }
-        function resetAll() { if(confirm("Reset?")) { total = 0; historyLog = []; saveData(); update(); closeAll(); } }
-        function deleteEntry(id) { 
-            triggerHaptic();
-            const idx = historyLog.findIndex(i => i.id === id);
-            if(idx > -1) { total -= historyLog[idx].hydration; if(total<0)total=0; historyLog.splice(idx,1); saveData(); update(); renderHistory(); }
-        }
-
-        let touchStartX = 0; let swipedItemId = null;
-        window.handleTouchStart = function(e, id) { touchStartX = e.touches[0].clientX; swipedItemId = id; }
-        window.handleTouchMove = function(e) {
-            if (!swipedItemId) return; const currentX = e.touches[0].clientX; const diff = currentX - touchStartX;
-            const el = document.getElementById('hist-item-' + swipedItemId); if(el && diff < 0) el.style.transform = `translateX(${diff}px)`;
-        }
-        window.handleTouchEnd = function(e) {
-            if (!swipedItemId) return; const el = document.getElementById('hist-item-' + swipedItemId); const diff = e.changedTouches[0].clientX - touchStartX;
-            if (diff < -100) { el.style.transition = 'all 0.3s ease'; el.style.transform = `translateX(-120%)`; setTimeout(() => deleteEntry(swipedItemId), 300); } 
-            else { el.style.transition = 'all 0.3s ease'; el.style.transform = `translateX(0)`; }
-            swipedItemId = null;
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('history-list'); list.innerHTML = "";
-            if (historyLog.length === 0) { list.innerHTML = "<div class='text-center text-sub mt-4 opacity-60'>...</div>"; return; }
-            historyLog.forEach(item => {
-                const wrapper = document.createElement('div'); wrapper.className = "relative overflow-hidden mb-2 rounded-2xl";
-                const bg = document.createElement('div'); bg.className = "absolute inset-0 bg-red-500 flex justify-end items-center pr-6 rounded-2xl";
-                bg.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>`;
-                const content = document.createElement('div'); content.id = 'hist-item-' + item.id;
-                content.className = "history-item-content relative bg-white/40 dark:bg-white/5 p-3 rounded-2xl border border-white/40 dark:border-white/10 flex justify-between items-center transition-transform";
-                content.innerHTML = `<div class="flex items-center gap-3"><span class="text-2xl">${item.icon}</span><div><div class="font-bold text-current">${item.amount} ml</div><div class="text-xs text-sub font-bold">${item.time}</div></div></div><div class="text-sm font-bold text-accent">+${Math.round(item.hydration)}</div>`;
-                content.addEventListener('touchstart', (e) => handleTouchStart(e, item.id), {passive: true});
-                content.addEventListener('touchmove', (e) => handleTouchMove(e), {passive: true});
-                content.addEventListener('touchend', (e) => handleTouchEnd(e), {passive: true});
-                wrapper.appendChild(bg); wrapper.appendChild(content); list.appendChild(wrapper);
-            });
-        }
-        function saveData() { localStorage.setItem('total', total); localStorage.setItem('historyLog', JSON.stringify(historyLog)); saveDailyProgress(); checkMidnightReset(); }
-        function update() {
-            document.getElementById('total').innerText = Math.round(total); document.getElementById('display-goal').innerText = goal;
-            const p = Math.min(Math.round((total/goal)*100), 100);
-            // Percentage display removed
-            document.getElementById('progress-fill').style.height = p + "%";
-            checkMidnightReset(); 
-        }
-        document.getElementById('lang-select').value = currentLang; changeLanguage(currentLang); update(); updateIconDisplay();
-    </script>
 </body>
 </html>
