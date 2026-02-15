@@ -122,7 +122,38 @@
         }
         body.dark .settings-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
         .settings-row:last-child { border-bottom: none; }
-        .ios-btn { background: rgba(120,120,120,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+
+        /* iOS Camera Buttons */
+        .ios-circle-btn { 
+            background: rgba(40,40,40,0.6); 
+            width: 50px; height: 50px; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.1s;
+        }
+        .ios-circle-btn:active { transform: scale(0.95); background: rgba(60,60,60,0.8); }
+
+        .ios-pill-btn {
+            background: rgba(30,30,30,0.65);
+            backdrop-filter: blur(12px);
+            padding: 10px 24px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+        .ios-pill-btn.active {
+            background: rgba(255, 204, 0, 0.9); /* Yellow active state */
+            color: black;
+            border-color: transparent;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center h-screen font-sans overflow-hidden relative selection:bg-blue-200" ontouchstart="">
@@ -170,7 +201,6 @@
             <div class="text-6xl font-thin tracking-tighter drop-shadow-sm text-current"><span id="total">0</span></div>
             <div class="text-sub uppercase tracking-[0.2em] text-[10px] font-semibold mt-1" id="lbl-hydro">ml nawodnienia</div>
             <div class="mt-2 flex flex-col items-center">
-                <div class="text-3xl font-bold text-accent drop-shadow-sm"><span id="percent-display">0</span>%</div>
                 <div class="text-xl font-bold text-orange-500 mt-1 flex items-center gap-1 transition-all duration-500 opacity-0" id="streak-container">
                     <span>🔥</span> <span id="streak-val">0</span>
                 </div>
@@ -180,13 +210,13 @@
 
     <div class="flex items-center justify-between w-full max-w-[320px] mb-12 px-2 z-20 gap-5">
         <div class="relative w-[76px] h-[76px] select-none">
-            <select id="amount-select" onchange="checkCustomAmount(this)" class="liquid-glass w-full h-full rounded-full text-accent text-xl outline-none cursor-pointer font-bold">
+            <select id="amount-select" onchange="checkCustomAmount(this)" class="liquid-glass w-full h-full rounded-full text-white text-xl outline-none cursor-pointer font-bold">
                 <option value="100">100</option><option value="250" selected>250</option><option value="330">330</option><option value="500">500</option><option value="1000">1000</option><option value="custom">✎</option>
             </select>
             <span class="absolute bottom-3 left-0 right-0 text-center text-[9px] text-sub font-bold uppercase tracking-wide pointer-events-none">ML</span>
         </div>
 
-        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-accent shadow-2xl transition duration-300 cursor-pointer select-none active:scale-95">
+        <button onclick="addDrink()" class="liquid-glass w-24 h-24 rounded-full flex items-center justify-center text-white shadow-2xl transition duration-300 cursor-pointer select-none active:scale-95">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
         </button>
 
@@ -211,19 +241,21 @@
         <canvas id="camera-canvas" class="hidden"></canvas>
         <img id="camera-preview" class="absolute inset-0 w-full h-full object-cover hidden">
         
-        <div id="shutter-container" class="absolute bottom-10 left-0 right-0 flex justify-center">
+        <div id="shutter-container" class="absolute bottom-10 left-0 right-0 flex justify-center pb-8">
             <button onclick="takePicture()" class="w-20 h-20 bg-white rounded-full border-4 border-gray-300 active:scale-95 transition"></button>
         </div>
 
-        <div id="camera-controls" class="absolute bottom-10 left-0 right-0 flex justify-between px-10 hidden">
-            <button onclick="closeCamera()" class="ios-btn text-white">
+        <div id="camera-controls" class="absolute bottom-10 left-0 right-0 flex justify-between items-center px-8 pb-8 hidden">
+            <button onclick="closeCamera()" class="ios-circle-btn text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            <button onclick="toggleCaptureBlur()" id="btn-capture-blur" class="ios-btn text-white gap-2 px-4 w-auto text-sm font-bold">
+            
+            <button onclick="toggleCaptureBlur()" id="btn-capture-blur" class="ios-pill-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z" clip-rule="evenodd" /></svg>
                 <span id="lbl-camera-blur">Blur</span>
             </button>
-            <button onclick="confirmPhoto()" class="ios-btn bg-orange-400 text-white font-bold">
+            
+            <button onclick="confirmPhoto()" class="ios-circle-btn bg-[#FFCC00] text-black border-none font-bold">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
             </button>
         </div>
@@ -243,13 +275,13 @@
             
             <div class="bg-[#2C2C2E] dark:bg-black/40 rounded-[20px] overflow-hidden mb-6 p-4 text-white shadow-lg">
                 <h4 class="font-bold mb-4" id="lbl-wall-title">Home Wallpaper</h4>
-                <button onclick="openCamera()" class="text-orange-400 text-lg mb-6 w-full text-left active:opacity-60 transition" id="btn-take-photo">Take Photo...</button>
+                <button onclick="openCamera()" class="text-orange-400 text-lg mb-6 w-full text-left active:opacity-60 transition font-medium" id="btn-take-photo">Take Photo...</button>
                 
                 <h5 class="text-sub font-bold text-xs uppercase mb-3" id="lbl-choose-exist">Choose from Existing</h5>
                 <div class="grid grid-cols-3 gap-3">
-                    <button onclick="setPresetWallpaper('linear-gradient(to top, #a8edea 0%, #fed6e3 100%)')" class="aspect-[2/3] rounded-xl bg-gradient-to-t from-[#a8edea] to-[#fed6e3] active:scale-95 transition"></button>
-                    <button onclick="setPresetWallpaper('linear-gradient(to top, #d299c2 0%, #fef9d7 100%)')" class="aspect-[2/3] rounded-xl bg-gradient-to-t from-[#d299c2] to-[#fef9d7] active:scale-95 transition"></button>
-                    <button onclick="setPresetWallpaper('linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)')" class="aspect-[2/3] rounded-xl bg-[linear-gradient(120deg,#84fab0_0%,#8fd3f4_100%)] active:scale-95 transition"></button>
+                    <button onclick="setPresetWallpaper('url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==)')" class="aspect-[2/3] rounded-xl bg-cover bg-center active:scale-95 transition" style="background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');"></button>
+                    <button onclick="setPresetWallpaper('url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PkT/lAAAAABJRU5ErkJggg==)')" class="aspect-[2/3] rounded-xl bg-cover bg-center active:scale-95 transition" style="background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PkT/lAAAAABJRU5ErkJggg==');"></button>
+                    <button onclick="setPresetWallpaper('url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkuM9QDwAD1wGEoZsa1AAAAABJRU5ErkJggg==)')" class="aspect-[2/3] rounded-xl bg-cover bg-center active:scale-95 transition" style="background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkuM9QDwAD1wGEoZsa1AAAAABJRU5ErkJggg==');"></button>
                 </div>
             </div>
 
@@ -369,7 +401,7 @@
                 goal: "CEL:", hydro: "ml nawodnienia", today: "Dzisiaj", stats: "Statystyki", week: "Ostatnie 7 dni", avg: "Średnia", best: "Najlepszy", notif: "Powiadomienia", lang: "Język", reset: "Zresetuj dzień", msg_am: "Czas na wodę! ☀️", msg_pm: "Prawie meta! 🌙", msg_on: "Włączone! 💧", drinks: ["Woda", "Sok", "Kawa", "Kawa+Mleko", "Woda Koko", "Mleko", "Energetyk", "Cola", "Herbata", "Alkohol"], fruits: ["Banan", "Mandarynka", "Kiwi", "Jabłko", "Arbuz", "Ananas"], label_drinks: "Napoje", label_fruits: "Owoce", set_goal: "Ustaw Cel", save: "Zapisz", 
                 pref: "Preferencje", appear: "Wygląd", theme: "Tryb ciemny", info: "Info", how_title: "Jak używać", how_text: "• Dotknij +, aby dodać napój.<br>• Przesuń w lewo na wpisie w historii, aby go usunąć.<br>• Pociągnij menu w dół, aby je zamknąć.<br>• Kliknij Cel, aby go zmienić.", tos_title: "Regulamin", 
                 tos_text: "<p class='font-bold'>1. Postanowienia ogólne</p>Aplikacja HydroTrack służy wyłącznie do celów informacyjnych i monitorowania nawyków nawodnienia. Nie stanowi porady medycznej.<br><br><p class='font-bold'>2. Dane Użytkownika</p>Wszystkie dane (historia picia, ustawienia) są przechowywane LOKALNIE na Twoim urządzeniu. Twórca nie ma do nich dostępu.<br><br><p class='font-bold'>3. Wyłączenie Odpowiedzialności</p>Używasz aplikacji na własną odpowiedzialność. Zawsze konsultuj się z lekarzem w kwestiach zdrowotnych.", 
-                settings_title: "Ustawienia", wall_title: "Tapeta ekranu", take_photo: "Zrób zdjęcie...", choose_exist: "Wybierz z gotowych", reset_wall: "Resetuj tapetę", blur_btn: "Rozmyj"
+                settings_title: "Ustawienia", wall_title: "Tapeta ekranu", take_photo: "Zrób zdjęcie...", choose_exist: "Wybierz z gotowych", reset_wall: "Resetuj tapetę", blur_btn: "Blur"
             },
             en: {
                 goal: "GOAL:", hydro: "ml hydration", today: "Today", stats: "Statistics", week: "Last 7 days", avg: "Average", best: "Best", notif: "Notifications", lang: "Language", reset: "Reset Day", msg_am: "Time for water! ☀️", msg_pm: "Almost there! 🌙", msg_on: "Enabled! 💧", drinks: ["Water", "Juice", "Coffee", "Coffee+Milk", "Coco Water", "Milk", "Energy", "Soda", "Tea", "Alcohol"], fruits: ["Banana", "Mandarin", "Kiwi", "Apple", "Watermelon", "Pineapple"], label_drinks: "Drinks", label_fruits: "Fruits", set_goal: "Set Goal", save: "Save",
@@ -409,7 +441,7 @@
             };
             for(let k in ids) { let el = document.getElementById(k); if(el) el.innerText = ids[k]; }
             document.getElementById('lbl-how-text').innerHTML = d.how_text;
-            document.getElementById('lbl-tos-text').innerHTML = d.tos_text; // HTML for ToS
+            document.getElementById('lbl-tos-text').innerHTML = d.tos_text; 
             document.getElementById('history-date').innerText = new Date().toLocaleDateString(locMap[lang], {weekday: 'long', day: 'numeric', month: 'long'});
             document.getElementById('grp-drinks').label = d.label_drinks; document.getElementById('grp-fruits').label = d.label_fruits;
             const drinkOpts = document.getElementById('grp-drinks').getElementsByTagName('option');
@@ -479,10 +511,9 @@
                 cameraControls.classList.add('hidden');
                 isBlurred = false;
                 previewElement.style.filter = '';
-                // Update blur button style
-                document.getElementById('btn-capture-blur').style.backgroundColor = '';
+                document.getElementById('btn-capture-blur').classList.remove('active');
             } catch (err) {
-                alert("Nie można uzyskać dostępu do aparatu. Upewnij się, że używasz HTTPS lub localhost.");
+                alert("Błąd dostępu do kamery. Upewnij się, że używasz HTTPS lub Localhost.");
                 console.error("Camera error:", err);
             }
         }
@@ -490,38 +521,49 @@
         function takePicture() {
             canvasElement.width = videoElement.videoWidth;
             canvasElement.height = videoElement.videoHeight;
-            canvasElement.getContext('2d').drawImage(videoElement, 0, 0);
+            const ctx = canvasElement.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0);
             capturedImageURI = canvasElement.toDataURL('image/jpeg');
             previewElement.src = capturedImageURI;
             previewElement.classList.remove('hidden');
             videoElement.classList.add('hidden');
             shutterBtn.classList.add('hidden');
             cameraControls.classList.remove('hidden');
+            cameraControls.classList.add('flex');
         }
 
         function toggleCaptureBlur() {
             isBlurred = !isBlurred;
             previewElement.style.filter = isBlurred ? 'blur(10px)' : '';
-             const btn = document.getElementById('btn-capture-blur');
-             if(isBlurred) btn.style.backgroundColor = 'rgba(255,255,255,0.3)';
-             else btn.style.backgroundColor = '';
+            const btn = document.getElementById('btn-capture-blur');
+            if(isBlurred) btn.classList.add('active');
+            else btn.classList.remove('active');
         }
 
         function confirmPhoto() {
             if (isBlurred) {
                 const ctx = canvasElement.getContext('2d');
+                ctx.clearRect(0,0, canvasElement.width, canvasElement.height);
                 ctx.filter = 'blur(20px)'; 
-                ctx.drawImage(previewElement, 0, 0);
-                capturedImageURI = canvasElement.toDataURL('image/jpeg');
-                ctx.filter = 'none'; 
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0);
+                    saveFinalImage(canvasElement.toDataURL('image/jpeg'));
+                };
+                img.src = capturedImageURI;
+            } else {
+                saveFinalImage(capturedImageURI);
             }
+        }
+
+        function saveFinalImage(dataUrl) {
             try {
-                localStorage.setItem('customBg', `url(${capturedImageURI})`);
+                localStorage.setItem('customBg', `url(${dataUrl})`);
                 applyBg();
                 closeCamera();
                 closeAll();
             } catch(err) {
-                 alert("Zdjęcie jest za duże. Spróbuj mniejsze.");
+                 alert("Zdjęcie jest zbyt duże dla pamięci przeglądarki. Spróbuj mniejsze.");
             }
         }
 
@@ -554,13 +596,12 @@
         function getTodayKey() { return new Date().toISOString().split('T')[0]; }
         function saveDailyProgress() { weeklyRecord[getTodayKey()] = total; localStorage.setItem('weeklyRecord', JSON.stringify(weeklyRecord)); }
         
-        /* --- STREAK LOGIC (NEXT DAY) --- */
+        /* --- STREAK LOGIC --- */
         function checkMidnightReset() {
             const today = getTodayKey(); 
             const lastDate = localStorage.getItem('lastDate');
             
             if (lastDate && lastDate !== today) { 
-                // It's a new day! Check if we achieved goal YESTERDAY to increment streak
                 const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
                 const yKey = yesterday.toISOString().split('T')[0];
                 const yVal = weeklyRecord[yKey] || 0;
@@ -573,7 +614,6 @@
                 }
                 localStorage.setItem('streak', streak);
 
-                // Reset for today
                 saveDailyProgress(); 
                 total = 0; 
                 historyLog = []; 
@@ -582,7 +622,6 @@
             }
             localStorage.setItem('lastDate', today);
             
-            // Visual Update
             const sContainer = document.getElementById('streak-container');
             if(streak > 0) {
                 document.getElementById('streak-val').innerText = streak;
@@ -697,7 +736,7 @@
         function update() {
             document.getElementById('total').innerText = Math.round(total); document.getElementById('display-goal').innerText = goal;
             const p = Math.min(Math.round((total/goal)*100), 100);
-            document.getElementById('percent-display').innerText = Math.round((total/goal)*100);
+            // Percentage display removed
             document.getElementById('progress-fill').style.height = p + "%";
             checkMidnightReset(); 
         }
